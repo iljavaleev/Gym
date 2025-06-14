@@ -28,7 +28,7 @@ const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused,
 };
 
 
-const InputWithLabelD = ({ id, defaultValue, type = 'text', isFocused, 
+const InputWithLabelD = ({ id, cls, defaultValue, type = 'text', isFocused, 
     children }) => {
     const inputRef = useRef();
 
@@ -43,7 +43,7 @@ const InputWithLabelD = ({ id, defaultValue, type = 'text', isFocused,
         <>
             <label htmlFor={id}>{children}</label>
             &nbsp;
-            <input ref={inputRef} id={id} type={type} defaultValue={defaultValue} />
+            <input ref={inputRef} className={cls} id={id} type={type} defaultValue={defaultValue} />
         </>
     );
 };

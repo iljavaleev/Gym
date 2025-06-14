@@ -1,5 +1,5 @@
-import { useState, useReducer, useEffect, useCallback } from 'react';
-import { DateTimeForm } from '../components/components';
+import { useState, useReducer, useEffect, useCallback, useRef } from 'react';
+import { Button, DateTimeForm } from '../components/components';
 import { useCookies } from 'react-cookie'
 import { TrainingFormList } from './components';
 
@@ -23,6 +23,14 @@ const mock_data = [
     }
 ]
 
+const to_add_ex = {
+    title: "",
+    load: [
+        {reps: null, expect: null, fact: null}
+    ]
+};
+
+
 
 const formatUrl = (date, user) =>  
     `http://192.168.1.159:8000/api/v1/search-by-date?user=${user}&date=${date}`;
@@ -32,6 +40,25 @@ const get_initial_query = (id) => {
         return formatUrl(Date.now(), id);
     return "";
 };
+
+const dataFromForm = (event) => 
+{
+    const new_data = Array.from(event.target.getElementsByClassName("exercise")).map(element => {
+        const a = {}
+        a["title"] = element.querySelector(".title").value;
+        a["load"] = Array.from(element.getElementsByClassName("load")).map(element => {
+            const b = {};
+            b["reps"] = element.querySelector(".reps").value;
+            b["expect"] = element.querySelector(".expect").value;
+            b["fact"] = element.querySelector(".fact").value;
+            return b;
+        });
+       
+        return a;
+    });
+    return new_data;
+
+}
 
 
 const trainingReducer = (state, action) => {
@@ -47,15 +74,19 @@ const trainingReducer = (state, action) => {
         case 'TRAINING_FETCH_FAILURE':
             return { ...state, isLoading: false, isError: true };
         case 'TRAINING_UPDATE':
-            console.log(action.payload.event.target);
             return { ...state, 
-                data: {
-                    ...state.data,  
-                    [action.payload.event.target.id]: action.payload.event.target.value
-                }, 
+                data: action.payload, 
                 isLoading: false, 
-                isError: false 
+                isError: false };
+        case 'TRAINING_ADD':
+            state.data.push(to_add_ex);
+            return { ...state,
+                data: state.data
             };
+        case 'TRAINING_DEL':
+            if (state.data.length > 0)
+                state.data.pop();
+            return { ...state };
         default:
             throw new Error();
     }
@@ -114,10 +145,11 @@ const GetUpdateDeleteTraining = () => {
 
     // training data
     const [ training, dispatchTraining ] = useReducer(
-        trainingReducer, {data: mock_data, isLoading: false, isError:false });
+        trainingReducer, {data: [], isLoading: false, isError:false });
     
     // url
     const [url, setUrl] = useState(get_initial_query(1));  //mock
+    
     const handleGetSubmit = (event) => {
         setTrainigDate(event.target.value);
         setUrl(formatUrl(trainingDate, 1)); //mock
@@ -126,16 +158,16 @@ const GetUpdateDeleteTraining = () => {
     };
 
     const handleUpdateSubmit = (event) => {
+        const new_data = dataFromForm(event); 
         dispatchTraining(
             { 
                 type: "TRAINING_UPDATE", 
-                payload: { event: event } 
+                payload: new_data
             }
         );
-        
         try
         {
-            postTrainingByDate(getUserId(), training.data);
+            postTrainingByDate(getUserId(), new_data);
         }
         catch (error)
         {
@@ -154,8 +186,6 @@ const GetUpdateDeleteTraining = () => {
 
     useEffect(() => {
         dispatchTraining({ type: 'TRAINING_FETCH_INIT' });
-      
-    
         (async () => {
             try
             {
@@ -173,6 +203,13 @@ const GetUpdateDeleteTraining = () => {
        
     }, [url]);
 
+    const handleExAdd = () => {
+       dispatchTraining({ type: 'TRAINING_ADD' }); 
+    };
+
+    const handleExDel = () => {
+        dispatchTraining({ type: 'TRAINING_DEL' }); 
+    };
     return (
         <>
             <DateTimeForm 
@@ -182,12 +219,15 @@ const GetUpdateDeleteTraining = () => {
             
             {training.isError && <p>Something went wrong ...</p>}
             {training.isLoading ? ( <p>Loading ...</p> ) : 
-                ( <TrainingFormList 
-                    list={training.data} 
-                    onSubmit={handleUpdateSubmit}
+                ( 
+                    <TrainingFormList 
+                        list={training.data} 
+                        onSubmit={handleUpdateSubmit}
                     /> 
                 )
-            } 
+            }
+            <Button onClick={handleExAdd}>+</Button>
+            <Button onClick={handleExDel}>-</Button>
         </>
     ); // create form list
 };
