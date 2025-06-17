@@ -29,7 +29,7 @@ const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused,
 
 
 const InputWithLabelD = ({ id, cls, defaultValue, type = 'text', isFocused, 
-    children }) => {
+    children, onInputChange }) => {
     const inputRef = useRef();
 
     useEffect(() => {
@@ -43,7 +43,7 @@ const InputWithLabelD = ({ id, cls, defaultValue, type = 'text', isFocused,
         <>
             <label htmlFor={id}>{children}</label>
             &nbsp;
-            <input ref={inputRef} className={cls} id={id} type={type} defaultValue={defaultValue} />
+            <input ref={inputRef} className={cls} id={id} type={type} defaultValue={defaultValue} onChange={onInputChange}/>
         </>
     );
 };
@@ -73,11 +73,11 @@ const NoMatch = () => {
     return (<p>There's nothing here: 404!</p>);
 };
 
-const DateTimeForm = ({ onSubmit, type="datetime-local" }) => {
+const DateTimeForm = ({ onSubmit, onChange, type="datetime-local" }) => {
     
     return (
             <form onSubmit={onSubmit}>
-                <InputWithLabelD id="training-time" defaultValue={ Date.now() } 
+                <InputWithLabelD id="training-time" defaultValue={ Date.now() } onInputChange={onChange} 
                     type={type} isFocused>
                     <strong>Найти тренировку: </strong>
                 </InputWithLabelD>

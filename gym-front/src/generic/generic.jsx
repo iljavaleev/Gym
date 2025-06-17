@@ -9,7 +9,7 @@ import axios from 'axios';
 //     `http://0.0.0.0:5555/api/v1/search?book=${book}&number=${number}`;
 
 const formatUrl = (book, number) =>  
-    `http://192.168.1.159:8000/api/v1/search?book=${book}&number=${number}`;
+    `http://localhost:8000/api/v1/search?book=${book}&number=${number}`;
 
 const INITIAL_QUERY = formatUrl(0, 1);
 

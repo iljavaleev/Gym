@@ -4,25 +4,34 @@ const LABELS = [ "Повторения", "Ожидаемое", "Факт" ];
 const LABELS_EN = [ "reps", "expect", "fact" ];
 
 
-const TrainingFormList = ({ list, onSubmit }) => {
+const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet }) => {
     let count = 0;
     return (
         <>
             <form onSubmit={onSubmit}>
                 <ul>
-                    {list.map((item) => (
-                        <FormItem id={"count"} key={count++} item={item}/>
+                    {list.map((item, idx) => (
+                        <FormItem 
+                            id={"count"} 
+                            key={count++} 
+                            item={item} 
+                            exNum={idx} 
+                            addSet={addSet} 
+                            delSet={delSet}
+                        />
                     ))}
                 </ul>
-                <button type="submit">Submit</button>
+                <Button onClick={addEx}>Добавить Упражнение</Button>
+                <Button onClick={delEx}>Удалить Упражнение</Button>
+                <br/>
+                <Button type="submit">Submit</Button>
             </form>
         </>
     );
 };
 
-const to_add_load = {reps: null, expect: null, fact: null};
 
-const FormItem = ({ item }) => {
+const FormItem = ({ item, exNum, addSet, delSet }) => {
     let count = 0;
     return (
         <li className="exercise">
@@ -36,8 +45,8 @@ const FormItem = ({ item }) => {
                     <ObjectToForm  obj={load}/>
                     <br/>
                 </div>)}
-            <Button onClick={handleAdd}>+</Button>
-            <Button onClick={handleDel}>-</Button>
+            <Button onClick={() => addSet(exNum)}>+</Button>
+            <Button onClick={() => delSet(exNum)}>-</Button>
         </li>
     );
 };
