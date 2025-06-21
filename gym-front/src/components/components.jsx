@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const Button = ({ onClick, type = 'button', children }) => (
     <button type={type} onClick={onClick}>
@@ -6,29 +6,8 @@ const Button = ({ onClick, type = 'button', children }) => (
     </button>
 );
 
-const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, 
-    children }) => {
-    const inputRef = useRef();
 
-    useEffect(() => {
-        if (isFocused && inputRef.current) 
-        {
-            inputRef.current.focus();
-        }
-    }, [isFocused]);
-
-    return (
-        <>
-            <label htmlFor={id}>{children}</label>
-            &nbsp;
-            <input ref={inputRef} id={id} type={type} value={value} 
-                onChange={onInputChange}/>
-        </>
-    );
-};
-
-
-const InputWithLabelD = ({ id, cls, defaultValue, type = 'text', isFocused, 
+const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused, 
     children, onInputChange }) => {
     const inputRef = useRef();
 
@@ -43,7 +22,9 @@ const InputWithLabelD = ({ id, cls, defaultValue, type = 'text', isFocused,
         <>
             <label htmlFor={id}>{children}</label>
             &nbsp;
-            <input ref={inputRef} className={cls} id={id} type={type} defaultValue={defaultValue} onChange={onInputChange}/>
+            <input ref={inputRef} value={value} className={cls} id={id} 
+                type={type} defaultValue={defaultValue} 
+                onChange={onInputChange}/>
         </>
     );
 };
@@ -73,19 +54,43 @@ const NoMatch = () => {
     return (<p>There's nothing here: 404!</p>);
 };
 
-const DateTimeForm = ({ onSubmit, onChange, type="datetime-local" }) => {
+
+const AutocompleteInput = ({ baseData, specData, val }) => {
+    const [inputValue, setInputValue] = useState(val);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     
+    const filtered = baseData.filter(suggestion =>
+        suggestion.toLowerCase().includes(inputValue.toLowerCase())
+    );
+
+    const handleChange = (event) => {
+        setShowSuggestions(true);
+        setInputValue(event.target.value);
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        setInputValue(suggestion);
+        setShowSuggestions(false); 
+    };
+
     return (
-            <form onSubmit={onSubmit}>
-                <InputWithLabelD id="training-time" defaultValue={ Date.now() } onInputChange={onChange} 
-                    type={type} isFocused>
-                    <strong>Найти тренировку: </strong>
-                </InputWithLabelD>
-                <button type="submit">Поиск</button>
-            </form>
+        <div>
+            <input
+            type="text"
+            value={inputValue}
+            onChange={handleChange}
+            />
+            {showSuggestions && (
+            <ul className="suggestions-list">
+                {filtered.map((suggestion, index) => (
+                <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                    {suggestion}
+                </li>
+                ))}
+            </ul>
+            )}
+        </div>
     );
 }
 
-
-
-export { Button, InputWithLabel, SearchForm, NoMatch, Form, DateTimeForm, InputWithLabelD };
+export { Button, InputWithLabel, SearchForm, NoMatch, Form, AutocompleteInput };

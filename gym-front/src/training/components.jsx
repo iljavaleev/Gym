@@ -1,7 +1,21 @@
-import { InputWithLabelD, Button } from "../components/components";
+import { InputWithLabel, Button, AutocompleteInput } from "../components/components";
+import { trainingData } from "../training/data";
 
 const LABELS = [ "Повторения", "Ожидаемое", "Факт" ];
-const LABELS_EN = [ "reps", "expect", "fact" ];
+
+
+const DateTimeForm = ({ onSubmit, onChange, type="datetime-local" }) => {
+    
+    return (
+            <form onSubmit={onSubmit}>
+                <InputWithLabel id="training-time" defaultValue={Date.now()} 
+                    onInputChange={onChange} type={type} isFocused>
+                    <strong>Дата тренировки: </strong>
+                </InputWithLabel>
+                <button type="submit">Найти</button>
+            </form>
+    );
+}
 
 
 const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet }) => {
@@ -24,21 +38,22 @@ const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet }) => {
                 <Button onClick={addEx}>Добавить Упражнение</Button>
                 <Button onClick={delEx}>Удалить Упражнение</Button>
                 <br/>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">Сохранить тренировку</Button>
             </form>
         </>
     );
 };
 
 
-const FormItem = ({ item, exNum, addSet, delSet }) => {
+const FormItem = ({ item, userArray, exNum, addSet, delSet }) => {
     let count = 0;
+    
     return (
         <li className="exercise">
-            <InputWithLabelD key={count++} cls="title" defaultValue={item.title} 
-                    isFocused>
-            <strong>Упражнение</strong>
-            </InputWithLabelD>
+            <AutocompleteInput baseData={trainingData}  userData={userArray} val={item.title}>
+                <strong>Упражнение</strong>
+            </AutocompleteInput>
+            {/* добавить возможность создавать упражнение */}
             <br/>
             {item.load.map(load => 
                 <div key={count++} className="load">
@@ -58,14 +73,14 @@ const ObjectToForm = ({obj}) => {
         <>
             {Object.entries(obj).map(([k, v]) => 
             (          
-                <InputWithLabelD key={count} cls={k} defaultValue={v} 
+                <InputWithLabel key={count} cls={k} defaultValue={v} 
                     isFocused>
                     <strong>{LABELS[count++]}</strong>
-                </InputWithLabelD>
+                </InputWithLabel>
             ))}
         </>
     )
 }
 
 
-export { TrainingFormList };
+export { TrainingFormList, DateTimeForm };
