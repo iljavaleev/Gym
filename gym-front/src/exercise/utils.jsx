@@ -11,8 +11,11 @@ const mock_data = [
 const formatExUrl = (user) =>  
     `http://localhost:8000/api/v1/user-exercise?user=${user}`;
 
+const formatDelExUrl = (user, id) =>
+    `http://localhost:8000/api/v1/user-exercise?user=${user}&ex=${id}`;
 
-const getUserExs = async () => {
+
+const getUserExs = (user) => {
 
     // const result = await axios(formatExUrl(user));
     return new Promise((resolve, error) => {
@@ -24,13 +27,14 @@ const getUserExs = async () => {
     );
 };
 
-const postUserEx = async (user, payload) => {
-    // const result = await axios.post(formatPostTraingUrl(user), payload);
+const postUserEx = (user, payload) => {
+    // const result = await axios.post(formatExUrl(user), payload);
     return new Promise((resolve, error) => {
+            const id = 33;
             if (payload)
             {
                 console.log(payload);
-                resolve();
+                resolve(id);
             }
             else
                 error(new Error());
@@ -38,4 +42,18 @@ const postUserEx = async (user, payload) => {
     );
 }
 
-export { getUserExs, postUserEx };
+const deleteUserEx = (user, payload) => {
+    // const result = await axios.delete(formatDelExUrl(user), payload);
+    return new Promise((resolve, error) => {
+            if (payload)
+            {
+                resolve(payload);
+            }
+            else
+                error(new Error());
+        }
+    );
+}
+
+
+export { getUserExs, postUserEx, deleteUserEx };

@@ -5,12 +5,12 @@ import { postUserEx } from "./utils";
 import { useCookies } from "react-cookie";
 
 
-const AddUserEx = ({ data }) => {
+const AddUserEx = ({ data, onDataChange }) => {
     const [ cookies ] = useCookies();    
     const [ add, setAdd ] = useState(false);
     const [ subm, setSubmit ] = useState(false);
-    const [ ex, setEx ] = useState({ isError: false, isSuccess: false, title:"" });
-
+    const [ ex, setEx ] = useState({ isError: false, 
+        isSuccess: false, title:"" });
 
     useEffect(() => {
         if (!subm) return;
@@ -18,9 +18,14 @@ const AddUserEx = ({ data }) => {
         const user_id = cookies.user_id;
         try
         {   
-            postUserEx(user_id, { title: ex.title });
-            data.push(ex.title);
-            setEx({ title:"", isError: false, isSuccess: true });
+        
+            const pr_id = postUserEx(user_id, { title: ex.title });
+            pr_id.then(id => {
+                data.push({ id: id, title: ex.title});
+                onDataChange(data);
+                setEx({ title:"", isError: false, isSuccess: true });
+            });
+           
         }
         catch
         {
@@ -29,20 +34,20 @@ const AddUserEx = ({ data }) => {
         setSubmit(false);
     }, [subm]);
 
-    const handleClickOpen = () => { setAdd(!add); setEx({...ex, isSuccess: false}) }
+    const handleClickOpen = () => { 
+        setAdd(!add); 
+        setEx({...ex, isSuccess: false}) 
+    }
 
-    const onChange = (event) => {
-        setEx({ ...ex,  title: event.target.value});
-    }
-    const onClick = () => {
-        setSubmit(true);
-    }
+    const onChange = (event) => { setEx({ ...ex,  title: event.target.value}); }
+    const onClick = () => { setSubmit(true); }
+    
     return (
         <>
             <Button onClick={handleClickOpen}>{add ? "Закрыть" : "Создать новое"}</Button>
             {
                 add && <div>
-                <InputWithLabel  onInputChange={onChange} >Введите название</InputWithLabel>
+                <InputWithLabel value={ex.title} onInputChange={onChange} >Введите название</InputWithLabel>
                 <Button onClick={onClick}>Отправить</Button>
                 { ex.isError && <><br/><strong>Error</strong></> }
                 { ex.isSuccess && <strong>SUCCESS</strong> }
@@ -52,19 +57,21 @@ const AddUserEx = ({ data }) => {
     );
 }
 
-const ListEx = ({ list }) => {
+const ListEx = ({ list, onDelete }) => {
     return (
         <ul>
             {list.map((item) => (
-                <Item key={item.id} item={item.title}/>
+                <Item key={item.id} item={item.title} onDelete={() => onDelete(item.id)}/>
             ))}
         </ul>
     );
 };
 
-const Item = ({ item }) => (
+const Item = ({ item, onDelete }) => (
     <li>
-        <span>{item}</span>&nbsp;
+        <span>{item}</span>
+        &nbsp;
+        <Button onClick={onDelete}>-</Button>
     </li>
 );
 

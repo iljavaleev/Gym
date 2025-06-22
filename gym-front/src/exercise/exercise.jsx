@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { AddUserEx, ListEx } from "./components";
-import { getUserExs } from "./utils";
+import { getUserExs, deleteUserEx } from "./utils";
 import { useCookies } from "react-cookie";
+
 
 
 const Exercise = () => {
@@ -10,12 +11,10 @@ const Exercise = () => {
 
 
     useEffect(() => {
-        const user = cookies.user_id;
-
         (async () => {
             try
             {
-                const user_data = await getUserExs(user);
+                const user_data = await getUserExs(cookies.user_id);
                 setUserExs(user_data); 
             }
             catch (error)
@@ -25,10 +24,20 @@ const Exercise = () => {
         })();
     }, []);
 
+    const handleChange = (data) => {
+        setUserExs({data: data});
+    };
+
+    const onDelete = (id) => {
+        console.log(id);
+        deleteUserEx(cookies.user_id, { id: id });
+        setUserExs({data: userExs.data.filter(it => it.id !== id)});
+    };
+
     return (
         <> 
-            <ListEx list={userExs.data}/>
-            <AddUserEx data={userExs.data}/>           
+            <ListEx list={userExs.data} onDelete={onDelete}/>
+            <AddUserEx data={userExs.data} onDataChange={handleChange} />           
         </>
     ); 
 }
