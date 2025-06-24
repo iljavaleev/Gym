@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AddUserEx, ListEx } from "./components";
 import { getUserExs, deleteUserEx } from "./utils";
 import { useCookies } from "react-cookie";
+import logger from "react-logger";
 
 
 
@@ -28,10 +29,16 @@ const Exercise = () => {
         setUserExs({data: data});
     };
 
-    const onDelete = (id) => {
-        console.log(id);
-        deleteUserEx(cookies.user_id, { id: id });
-        setUserExs({data: userExs.data.filter(it => it.id !== id)});
+    const onDelete = async(id) => {
+        try
+        {   
+            await deleteUserEx(cookies.user_id, { id: id });
+            setUserExs({data: userExs.data.filter(it => it.id !== id)});
+        }
+        catch(error)
+        {
+            logger.error(error);
+        }
     };
 
     return (

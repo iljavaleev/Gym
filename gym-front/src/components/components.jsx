@@ -18,6 +18,14 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
         }
     }, [isFocused]);
 
+    if (!onInputChange)
+    {
+        onInputChange = (event) => {
+             event.target.nextElementSibling.innerHTML = "";
+        }
+    }
+      
+
     return (
         <>
             <label htmlFor={id}>{children}</label>
@@ -25,6 +33,7 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
             <input ref={inputRef} value={value} className={cls} id={id} 
                 type={type} defaultValue={defaultValue} 
                 onChange={onInputChange}/>
+            <strong className="error" id={id + "-error"}></strong>
         </>
     );
 };
@@ -55,7 +64,7 @@ const NoMatch = () => {
 };
 
 
-const AutocompleteInput = ({ baseData, specData, val }) => {
+const AutocompleteInput = ({ baseData, specData, val, className, id }) => {
     const [inputValue, setInputValue] = useState(val);
     const [showSuggestions, setShowSuggestions] = useState(false);
     
@@ -66,6 +75,7 @@ const AutocompleteInput = ({ baseData, specData, val }) => {
     const handleChange = (event) => {
         setShowSuggestions(true);
         setInputValue(event.target.value);
+        event.target.nextElementSibling.innerHTML = "";
     };
 
     const handleSuggestionClick = (suggestion) => {
@@ -74,12 +84,15 @@ const AutocompleteInput = ({ baseData, specData, val }) => {
     };
 
     return (
-        <div>
+        <div >
             <input
+            className={className}
             type="text"
             value={inputValue}
             onChange={handleChange}
+            id={id}
             />
+            <p id={id + "-error"}></p>
             {showSuggestions && (
             <ul className="suggestions-list">
                 {filtered.map((suggestion, index) => (

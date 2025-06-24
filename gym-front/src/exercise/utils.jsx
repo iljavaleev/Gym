@@ -15,7 +15,7 @@ const formatDelExUrl = (user, id) =>
     `http://localhost:8000/api/v1/user-exercise?user=${user}&ex=${id}`;
 
 
-const getUserExs = (user) => {
+const getUserExs = async (user) => {
 
     // const result = await axios(formatExUrl(user));
     return new Promise((resolve, error) => {
@@ -27,7 +27,7 @@ const getUserExs = (user) => {
     );
 };
 
-const postUserEx = (user, payload) => {
+const postUserEx = async (user, payload) => {
     // const result = await axios.post(formatExUrl(user), payload);
     return new Promise((resolve, error) => {
             const id = 33;
@@ -42,7 +42,7 @@ const postUserEx = (user, payload) => {
     );
 }
 
-const deleteUserEx = (user, payload) => {
+const deleteUserEx = async (user, payload) => {
     // const result = await axios.delete(formatDelExUrl(user), payload);
     return new Promise((resolve, error) => {
             if (payload)

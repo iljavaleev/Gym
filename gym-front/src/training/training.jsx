@@ -10,48 +10,61 @@ import { getTrainingByDate,
     dataFromForm 
 } from './utils'; 
 
-// array.splice(index, 1)
 
-
-const GetUpdateDeleteTraining = ({date}) => {
+const Training = () => {
     const [ cookies, setCookie ] = useCookies();
-    
+    const [ trainingDate, setTrainigDate ] = useState(null);
+    const handleGetSubmit = (event) => {
+        setUrl(formatDateUrl(date, 1)); //mock
+        event.preventDefault();
+    };
+
+    const handleChangeDate = (event) => {
+        setTrainigDate(event.target.value);
+    };
+
     // training data
-    const [ training, dispatchTraining ] = useReducer(
-        trainingReducer, {
-            data: [], 
-            isLoading: false, 
-            isError:false, 
-            isCruError: false });
+    const [ trainingForm, dispatchTraining ] = useReducer(
+        trainingReducer, 
+        { data: [], isLoading: false, isError:false, isCruError: false }
+    );
     
     // url
     const [url, setUrl] = useState(getInitialQuery(1));  //mock
     
     const handleUpdateSubmit = (event) => {
-        const new_data = dataFromForm(event); 
-        dispatchTraining(
-            { 
-                type: "TRAINING_UPDATE", 
-                payload: new_data
-            }
-        );
+        let new_data = null;
         try
         {
-            setCookie("user_id", 1); ///
-            if (!date)
-            {
-                dispatchTraining({ type: 'TRAINING_CRU_FAILURE' });
-            }
-            else
-                postTrainingByDate(
-                    getInitialQuery(cookies.user_id), 
-                    {training: new_data, date: date}
-                );
+            new_data = dataFromForm(event);
+        }
+        catch(error)
+        {
+            console.error(error);
+        }
+        
+        
+        dispatchTraining({ type: "TRAINING_UPDATE", payload: new_data });
+        setCookie("user_id", 1); /// mock
+        if (!trainingDate)
+        {
+            dispatchTraining({ type: 'TRAINING_CRU_FAILURE' });
+            event.preventDefault();
+            return;
+        }
+                
+        try
+        {
+            postTrainingByDate(
+                getInitialQuery(cookies.user_id), 
+                {trainingForm: new_data, date: trainingDate}
+            );
+            dispatchTraining({ type: 'TRAINING_CRU_SUCCESS' });
         }
         catch (error)
         {
             console.log(error)
-            dispatchTraining({ type: 'TRAINING_FETCH_FAILURE' }); // 
+            dispatchTraining({ type: 'TRAINING_CRU_FAILURE' }); // 
         }
         event.preventDefault();
     };
@@ -96,15 +109,20 @@ const GetUpdateDeleteTraining = ({date}) => {
         dispatchTraining({ type: 'TRAINING_DEL' });
     }
 
-
     return (
         <>
-            {training.isCruError && <p>Wrong Date </p>}
-            {training.isError && <p>Something went wrong ...</p>}
-            {training.isLoading ? ( <p>Loading ...</p> ) : 
+            <DateTimeForm 
+                searchTerm={trainingDate} 
+                onSubmit={handleGetSubmit}
+                onChange={handleChangeDate}
+            />
+
+            {trainingForm.isCruError && <p>Wrong Date </p>}
+            {trainingForm.isError && <p>Something went wrong ...</p>}
+            {trainingForm.isLoading ? ( <p>Loading ...</p> ) : 
                 ( 
                     <TrainingFormList 
-                        list={training.data} 
+                        list={trainingForm.data} 
                         onSubmit={handleUpdateSubmit}
                         addSet={addSet}
                         delSet={delSet}
@@ -114,33 +132,9 @@ const GetUpdateDeleteTraining = ({date}) => {
                 )
             }
             <hr/>
-            {training.data && <Button onSubmit={handleDelTraining}>Удалить тренировку</Button>}
+            {trainingForm.data && <Button onSubmit={handleDelTraining}>Удалить тренировку</Button>}
         </>
     ); 
 };
-
-const Training = () => {
-    // date
-    const [ trainingDate, setTrainigDate ] = useState(null);
-    const handleGetSubmit = (event) => {
-        setUrl(formatDateUrl(date, 1)); //mock
-        event.preventDefault();
-    };
-
-    const handleChangeDate = (event) => {
-        setTrainigDate(event.target.value);
-    };
-    return (
-        <> 
-            <DateTimeForm 
-                searchTerm={trainingDate} 
-                onSubmit={handleGetSubmit}
-                onChange={handleChangeDate}
-            />
-            <GetUpdateDeleteTraining date={trainingDate}/>
-        </>
-    ); // create form list
-};
-
 
 export { Training };

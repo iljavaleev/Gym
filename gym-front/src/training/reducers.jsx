@@ -28,6 +28,8 @@ const trainingReducer = (state, action) => {
             }
         case 'TRAINING_CRU_FAILURE':
             return { ...state, isCruError: true };
+        case 'TRAINING_CRU_SUCCESS':
+            return { ...state, isCruError: false };
         case 'EX_ADD':
             state.data.push(JSON.parse(JSON.stringify(to_add_ex)));
             return { ...state,

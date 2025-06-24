@@ -50,14 +50,13 @@ const FormItem = ({ item, userArray, exNum, addSet, delSet }) => {
     
     return (
         <li className="exercise">
-            <AutocompleteInput baseData={trainingData}  userData={userArray} val={item.title}>
+            <AutocompleteInput id={"title" + exNum} className="title" baseData={trainingData} userData={userArray} val={item.title}>
                 <strong>Упражнение</strong>
             </AutocompleteInput>
-            {/* добавить возможность создавать упражнение */}
             <br/>
             {item.load.map(load => 
                 <div key={count++} className="load">
-                    <ObjectToForm  obj={load}/>
+                    <ObjectToForm exNum={exNum}  obj={load}/>
                     <br/>
                 </div>)}
             <Button onClick={() => addSet(exNum)}>+</Button>
@@ -67,13 +66,13 @@ const FormItem = ({ item, userArray, exNum, addSet, delSet }) => {
 };
 
 
-const ObjectToForm = ({obj}) => {
+const ObjectToForm = ({obj, exNum}) => {
     let count = 0;
     return  (   
         <>
             {Object.entries(obj).map(([k, v]) => 
             (          
-                <InputWithLabel key={count} cls={k} defaultValue={v} 
+                <InputWithLabel key={count} id={k + exNum} cls={k} defaultValue={v} 
                     isFocused>
                     <strong>{LABELS[count++]}</strong>
                 </InputWithLabel>
