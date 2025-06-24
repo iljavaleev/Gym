@@ -104,39 +104,45 @@ const validateField = (field, obj) => {
         if (!validation.isValid(obj.value))
         {
             showError(obj.id, validation.message);
-            return;
+            return 1;
         }
     }
+    return 0;
 }
 
 
 const dataFromForm = (event) => 
 {
+    let errors = [];
     const new_data = Array.from(event.target.getElementsByClassName("exercise")).map(element => {
         const exercise = {}
         const title = element.querySelector(".title");
-        validateField("title", title);
+        errors.push(validateField("title", title));
         exercise.title = title.value;
 
         exercise.load = Array.from(element.getElementsByClassName("load")).map(element => {
             const load = {};
             const reps = element.querySelector(".reps");
-            validateField("reps", reps);
+            errors.push(validateField("reps", reps));
             load.reps = reps.value;
 
             const expect = element.querySelector(".expect");
-            validateField("expect", expect);
+            errors.push(validateField("expect", expect));
             load.expect = expect.id;
             
             const fact = element.querySelector(".fact");
-            validateField("fact", fact);
+            errors.push(validateField("fact", fact));
             load.fact = fact.value;
             return load;
         });
        
         return exercise;
     });
-    return new_data;
+    const sumWithInitial = errors.reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+        0,
+    );
+    return [new_data, sumWithInitial ? true : false];
 }
 
 

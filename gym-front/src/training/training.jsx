@@ -11,16 +11,17 @@ import { getTrainingByDate,
 } from './utils'; 
 
 
+
 const Training = () => {
     const [ cookies, setCookie ] = useCookies();
-    const [ trainingDate, setTrainigDate ] = useState(null);
+    const [ trainingDate, setTrainigDate ] = useState({ date: null, isDateError: false });
     const handleGetSubmit = (event) => {
-        setUrl(formatDateUrl(date, 1)); //mock
+        setUrl(formatDateUrl(trainingDate.date, 1)); //mock
         event.preventDefault();
     };
 
     const handleChangeDate = (event) => {
-        setTrainigDate(event.target.value);
+        setTrainigDate({ isDateError: false, date: event.target.value});
     };
 
     // training data
@@ -34,25 +35,34 @@ const Training = () => {
     
     const handleUpdateSubmit = (event) => {
         let new_data = null;
+        let hasErrors = null;
         try
         {
-            new_data = dataFromForm(event);
+           [new_data, hasErrors] = dataFromForm(event);
         }
         catch(error)
         {
             console.error(error);
         }
         
-        
-        dispatchTraining({ type: "TRAINING_UPDATE", payload: new_data });
-        setCookie("user_id", 1); /// mock
-        if (!trainingDate)
+        if (!trainingDate.date)
+        {
+            setTrainigDate({...trainingDate, isDateError: true});
+            console.log(trainingDate.date)
+            event.preventDefault();
+            return;
+        }
+
+        if (hasErrors )
         {
             dispatchTraining({ type: 'TRAINING_CRU_FAILURE' });
             event.preventDefault();
             return;
         }
-                
+
+        dispatchTraining({ type: "TRAINING_UPDATE", payload: new_data });
+        setCookie("user_id", 1); /// mock
+                        
         try
         {
             postTrainingByDate(
@@ -117,7 +127,7 @@ const Training = () => {
                 onChange={handleChangeDate}
             />
 
-            {trainingForm.isCruError && <p>Wrong Date </p>}
+            {trainingDate.isDateError && <p>Wrong Date </p>}
             {trainingForm.isError && <p>Something went wrong ...</p>}
             {trainingForm.isLoading ? ( <p>Loading ...</p> ) : 
                 ( 
