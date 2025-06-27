@@ -1,4 +1,6 @@
+
 // if field changed
+
 const getDirtyFields = (form, initial_state) => {
     return  (
                 Object.keys(form).reduce((acc, key) => {
@@ -34,4 +36,13 @@ const getErrorFields = (form, restrictions) =>
     return errors;
 };
 
-export { getDirtyFields, getErrorFields };
+const parseJwt = (token) => {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
+};
+
+export { getDirtyFields, getErrorFields, parseJwt };

@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { AddUserEx, ListEx } from "./components";
 import { getUserExs, deleteUserEx } from "./utils";
 import { useCookies } from "react-cookie";
-import logger from "react-logger";
-
 
 
 const Exercise = () => {

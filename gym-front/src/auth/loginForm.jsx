@@ -1,26 +1,13 @@
-import { getDirtyFields, getErrorFields } from '../utils/utils';
+import { getDirtyFields, getErrorFields, parseJwt } from '../utils/utils';
 import { AuthField } from './components';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie'
-import { useLocation, Link } from 'react-router';
-
-import axios from 'axios';
+import { useLocation, Link, useNavigate } from 'react-router';
+import { VALIDATION } from './validation';
+import { getToken } from './utils';
 
 const ENDPOINT = "http://localhost:8000/api/v1/login";
 
-
-const getToken = async (payload) => {
-  
-    const result = await axios.post(ENDPOINT, payload);
-    
-    return new Promise((resolve, error) => {
-            if (result)
-                resolve({ data: { token: result.token, user_id: result.user_id } });
-            else
-                error(new Error());
-        }
-    );
-}
 
 
 const INITIAL_STATE = {
@@ -29,30 +16,11 @@ const INITIAL_STATE = {
 };
 
 
-const RESTRICTIONS = {
-    email: [
-        {
-            isValid: (value) => !!value,
-            message: 'Is required',
-        },
-        {
-            isValid: (value) => /\S+@\S+\.\S+/.test(value),
-            message: 'Needs to be an email',
-        }
-    ],
-    password: [
-        {
-            isValid: (value) => !!value,
-            message: 'Is required',
-        }
-    ]
-};
-
-
 const LoginForm = () => { 
     const [form, setForm] = useState(INITIAL_STATE);
     const [ cookies, setCookie ] = useCookies(["access_token", "user_id"]);
     const location = useLocation();
+    const navigate = useNavigate();
     const handleChange = (event) => {
         setForm({
             ...form,
@@ -66,31 +34,34 @@ const LoginForm = () => {
     let errorFields = {};
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        errorFields = getErrorFields(form, RESTRICTIONS);
+        errorFields = getErrorFields(form, VALIDATION);
         const hasErrors = Object.values(errorFields).flat().length > 0;
-        if (hasErrors) return;
+        if (hasErrors)
+        {
+            console.log(errorFields);
+            return;   
+        };
         
         try
         {
-            const [token, user_id] = await getToken({
-                "email": form.email,
-                "password": form.password
-            });
-            setCookie("access_token", token);
+            const form_data = new FormData();
+            form_data.append("username", form.email);
+            form_data.append("password", form.password);
+            
+            const {access_token, user_id, expire} = await getToken(ENDPOINT, form_data);
+
+            setCookie("access_token", access_token, {expires: expire});            
             setCookie("user_id", user_id);
         }
         catch (error)
         {
+            console.log(error)
             console.info("Failed to get token");
         }
-
-        // navigate to home?
+        navigate("/");
     };
     
     
-    console.log(errorFields);
-
     return (
         <div>
             <h2>Log in Form</h2>
@@ -100,16 +71,16 @@ const LoginForm = () => {
                     value={form.email}  
                     onChange={handleChange} 
                     errorFields={errorFields}>
-                    Email
+                    Адрес эл. почты
                 </AuthField> 
                 <AuthField 
                     id={"password"} 
                     value={form.password} 
                     onChange={handleChange} 
                     errorFields={errorFields}>
-                    Password
+                    Пароль
                 </AuthField> 
-            <button type="submit" disabled={hasChanges}>Submit</button>
+            <button type="submit" disabled={hasChanges}>Войти</button>
             <span>Еще нет аккаунта?<Link to="/register" replace state={{from: location}}>Зарегестрируйтесь</Link></span>
             </form>
         </div>

@@ -2,33 +2,11 @@ import { getDirtyFields, getErrorFields } from '../utils/utils';
 import { AuthField } from './components';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-
-
-import axios from 'axios';
+import { VALIDATION } from './validation';
+import { getToken } from './utils';
+import { useCookies } from 'react-cookie'
 
 const ENDPOINT = "http://localhost:8000/api/v1/register";
-
-
-const asyncRegister = async (payload) => {
-    let result = "res";
-    // try
-    // {
-    //     result = await axios.post(ENDPOINT, payload);
-    // }
-    // catch (error)
-    // {
-    //     confirm.error(error);
-    // }
-    
-    return new Promise((resolve, error) => {
-            if (result)
-                resolve();
-            else
-                error(new Error());
-        }
-    );
-}
-
 
 const INITIAL_STATE = {
     email: '',
@@ -37,36 +15,10 @@ const INITIAL_STATE = {
 };
 
 
-const RESTRICTIONS = {
-    email: [
-        {
-            isValid: (value) => !!value,
-            message: 'Is required.',
-        },
-        {
-            isValid: (value) => /\S+@\S+\.\S+/.test(value),
-            message: 'Needs to be an email.',
-        },
-    ],
-    password1: [
-        {
-            isValid: (value) => !!value,
-            message: 'Is required.',
-        },
-    ],
-    password2: [
-        {
-            isValid: (value) => !!value,
-            message: 'Is required.'
-        }
-    ]
-};
-
-
 const SignUpForm = () => { 
     const location = useLocation();
     const navigate = useNavigate();
-
+    const [ cookies, setCookie ] = useCookies(["access_token", "user_id"]);
     const [form, setForm] = useState(INITIAL_STATE);
 
     const handleChange = (event) => {
@@ -82,16 +34,20 @@ const SignUpForm = () => {
     let errorFields = {};
     const handleSubmit = async (event) => {
         event.preventDefault();
-        errorFields = getErrorFields(form, RESTRICTIONS);
+        errorFields = getErrorFields(form, VALIDATION);
         const hasErrors = Object.values(errorFields).flat().length > 0;
         if (hasErrors) return;
         
         try
         {
-            await asyncRegister({
-                "email": form.email,
-                "password": form.password1
-            });
+            const form_data = new FormData();
+            form_data.append("username", form.email);
+            form_data.append("password", form.password1);
+            
+            const {access_token, user_id, expire } = await getToken(ENDPOINT, form_data);
+
+            setCookie("access_token", access_token, {expires: expire});            
+            setCookie("user_id", user_id);
             navigate(location.state?.from?.pathname);
         }
         catch (error)
@@ -100,10 +56,9 @@ const SignUpForm = () => {
             console.info("Failed to get token");
         }
         
-        console.log("SUB");
         // navigate to home?
     };
-    console.log(errorFields);
+
     return (
         <div>
             <h2>Registration Form</h2>
@@ -113,23 +68,23 @@ const SignUpForm = () => {
                     value={form.email}  
                     onChange={handleChange} 
                     errorFields={errorFields}>
-                    Email
+                    Адрес эл. почты
                 </AuthField> 
                 <AuthField 
                     id={"password1"} 
                     value={form.password1}  
                     onChange={handleChange} 
                     errorFields={errorFields}>
-                    Password
+                    Пароль
                 </AuthField> 
                 <AuthField 
                     id={"password2"} 
                     value={form.password2}  
                     onChange={handleChange} 
                     errorFields={errorFields}>
-                    Confirm Password
+                    Подтвердите пароль
                 </AuthField> 
-            <button type="submit" disabled={hasChanges}>Submit</button>
+            <button type="submit" disabled={hasChanges}>Зарегестрироваться</button>
             </form>
         </div>
     );

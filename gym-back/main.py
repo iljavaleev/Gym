@@ -1,26 +1,27 @@
-from contextlib import (
-    asynccontextmanager
-)
-from DB.db_connection import get_engine, get_session
-from DB.database import Base, Endurance, Strength
-from responses import EnduranceTraining, StrenghtTrainig
-
-from typing import Annotated
-from sqlalchemy.orm import Session
+from contextlib import asynccontextmanager
 from fastapi import Depends, HTTPException, status, FastAPI
-import logging
+from sqlmodel import SQLModel
 from fastapi.middleware.cors import CORSMiddleware
+from routers import generic, auth
+from db_connection import get_engine
+from models.database import Base
+
+import logging
 
 logger = logging.getLogger('uvicorn.error')
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=get_engine())
     yield
 
-origins = ["http://localhost:5173"]
+origins = ["http://localhost:5173/"]
+
 
 app = FastAPI(title="Saas application", lifespan=lifespan)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,28 +30,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get(
-    "/api/v1/search",
-    status_code=status.HTTP_200_OK,
-)
-def register(
-    book:int,
-    number: int,
-    session: Session = Depends(get_session),
-) -> list[EnduranceTraining|StrenghtTrainig]:
-    res_list = []
-    if (book):
-        res_list = (session.query(Endurance)
-        .filter(Endurance.work_id == number))
-
-        return [EnduranceTraining(
-            exercise=e.exercise, 
-            reps=e.reps, 
-            superset=e.superset) for e in res_list]
-
-    res_list = (session.query(Strength)
-    .filter(Strength.work_id == number))
-
-    return [StrenghtTrainig(
-            exercise=e.exercise, 
-            reps=e.reps) for e in res_list]
+app.include_router(generic.router)
+app.include_router(auth.router)

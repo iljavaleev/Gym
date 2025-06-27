@@ -3,15 +3,15 @@ import { InputWithLabel, Button } from "../components/components";
 
 import { postUserEx } from "./utils";
 import { useCookies } from "react-cookie";
-
+import { VALIDATION } from "./validation";
 
 const AddUserEx = ({ data, onDataChange }) => {
     const [ cookies ] = useCookies();    
     const [ add, setAdd ] = useState(false);
     const [ subm, setSubmit ] = useState(false);
-    const [ ex, setEx ] = useState({ isError: false, 
+    const [ ex, setEx ] = useState({ isError: false, errorMsg: "",
         isSuccess: false, title:"" });
-
+    
     useEffect(() => {
         if (!subm) return;
         if (!ex.title) return;
@@ -29,7 +29,7 @@ const AddUserEx = ({ data, onDataChange }) => {
         }
         catch
         {
-            setEx({ ...ex, isError: true });
+            setEx({ ...ex, isError: true, errorMsg: "Ошибка. Попробуйте позднее" });
         }   
         setSubmit(false);
     }, [subm]);
@@ -39,8 +39,21 @@ const AddUserEx = ({ data, onDataChange }) => {
         setEx({...ex, isSuccess: false}) 
     }
 
-    const onChange = (event) => { setEx({ ...ex,  title: event.target.value}); }
-    const onClick = () => { setSubmit(true); }
+    const onChange = (event) => { setEx({ ...ex,  
+        title: event.target.value, isError: false, errorMsg: "" }); }
+    
+    const onClick = () => { 
+        for (const validation of VALIDATION.title)
+        {
+            if (!validation.isValid(ex.title))
+            {
+                setEx({...ex, isError: true, errorMsg: validation.message});
+                return;
+            }
+        }
+        setSubmit(true); 
+    
+    }
     
     return (
         <>
@@ -49,7 +62,7 @@ const AddUserEx = ({ data, onDataChange }) => {
                 add && <div>
                 <InputWithLabel value={ex.title} onInputChange={onChange} >Введите название</InputWithLabel>
                 <Button onClick={onClick}>Отправить</Button>
-                { ex.isError && <><br/><strong>Error</strong></> }
+                { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                 { ex.isSuccess && <strong>SUCCESS</strong> }
                 </div>
             }

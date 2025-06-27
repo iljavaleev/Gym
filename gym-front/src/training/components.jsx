@@ -1,7 +1,7 @@
 import { InputWithLabel, Button, AutocompleteInput } from "../components/components";
 import { trainingData } from "../training/data";
 
-const LABELS = [ "Повторения", "Ожидаемое", "Факт" ];
+const LABELS = [ "повторения", "ожидаемый результат", "фактический" ];
 
 
 const DateTimeForm = ({ onSubmit, onChange, type="datetime-local" }) => {
@@ -50,9 +50,8 @@ const FormItem = ({ item, userArray, exNum, addSet, delSet }) => {
     
     return (
         <li className="exercise">
-            <AutocompleteInput id={"title" + exNum} className="title" baseData={trainingData} userData={userArray} val={item.title}>
-                <strong>Упражнение</strong>
-            </AutocompleteInput>
+            <AutocompleteInput id={"title" + exNum} className="title" 
+                baseData={trainingData} userData={userArray} val={item.title}/>
             <br/>
             {item.load.map(load => 
                 <div key={count++} className="load">
@@ -72,9 +71,8 @@ const ObjectToForm = ({obj, exNum}) => {
         <>
             {Object.entries(obj).map(([k, v]) => 
             (          
-                <InputWithLabel key={count} id={k + exNum} cls={k} defaultValue={v} 
+                <InputWithLabel key={count} id={k + exNum} cls={k} defaultValue={v} help={LABELS[count++]}
                     isFocused>
-                    <strong>{LABELS[count++]}</strong>
                 </InputWithLabel>
             ))}
         </>

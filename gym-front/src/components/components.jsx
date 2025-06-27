@@ -8,7 +8,7 @@ const Button = ({ onClick, type = 'button', children }) => (
 
 
 const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused, 
-    children, onInputChange }) => {
+    children, onInputChange, help }) => {
     const inputRef = useRef();
 
     useEffect(() => {
@@ -32,7 +32,7 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
             &nbsp;
             <input ref={inputRef} value={value} className={cls} id={id} 
                 type={type} defaultValue={defaultValue} 
-                onChange={onInputChange}/>
+                onChange={onInputChange} placeholder={help}/>
             <strong className="error" id={id + "-error"}></strong>
         </>
     );
@@ -64,13 +64,16 @@ const NoMatch = () => {
 };
 
 
-const AutocompleteInput = ({ baseData, specData, val, className, id }) => {
+const AutocompleteInput = ({ baseData, specData, val, className, id, help="упражнение" }) => {
     const [inputValue, setInputValue] = useState(val);
     const [showSuggestions, setShowSuggestions] = useState(false);
     
-    const filtered = baseData.filter(suggestion =>
-        suggestion.toLowerCase().includes(inputValue.toLowerCase())
-    );
+    const filtered = inputValue ? baseData.filter(suggestion => 
+        {   
+            const re = new RegExp(`(^| )(${inputValue.toLowerCase().trim()})+`);
+            return re.test(suggestion.toLowerCase())
+        }
+    ) : [];
 
     const handleChange = (event) => {
         setShowSuggestions(true);
@@ -91,6 +94,7 @@ const AutocompleteInput = ({ baseData, specData, val, className, id }) => {
             value={inputValue}
             onChange={handleChange}
             id={id}
+            placeholder={help}
             />
             <p id={id + "-error"}></p>
             {showSuggestions && (

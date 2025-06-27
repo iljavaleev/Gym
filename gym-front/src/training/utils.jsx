@@ -146,21 +146,5 @@ const dataFromForm = (event) =>
 }
 
 
-const getErrorFields = (form) =>
-    Object.keys(form).reduce((acc, key) => {
-    if (!VALIDATION[key]) return acc;
-
-    const errorsPerField = VALIDATION[key]
-        .map((validation) => ({
-            isValid: validation.isValid(form[key]), // bool
-            message: validation.message,
-        }))
-        // only keep the errors
-        .filter((errorPerField) => !errorPerField.isValid);
-
-    return { ...acc, [key]: errorsPerField };
-    }, {});
-
-
 export { delTrainingByDate, postTrainingByDate, getTrainingByDate, 
-    getInitialQuery, dataFromForm, getErrorFields }
+    getInitialQuery, dataFromForm }

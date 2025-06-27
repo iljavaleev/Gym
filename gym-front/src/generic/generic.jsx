@@ -58,7 +58,6 @@ const Generic = () => {
         event.preventDefault();
     };
 
-
     useEffect(() => {
         dispatchStories({ type: 'TRAINING_FETCH_INIT' });
         const cachedResult = JSON.parse(localStorage.getItem(url));
