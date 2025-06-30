@@ -1,64 +1,60 @@
 import { getDirtyFields, getErrorFields } from '../utils/utils';
 import { AuthField } from './components';
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
+import { useCookies } from 'react-cookie';
 import { VALIDATION } from './validation';
-import { getToken } from './utils';
-import { useCookies } from 'react-cookie'
+import { submit } from './utils';
 
 const ENDPOINT = "http://localhost:8000/api/v1/register";
 
+
 const INITIAL_STATE = {
     email: '',
-    password1: '',
+    password: '',
     password2: ''
 };
 
 
 const SignUpForm = () => { 
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [ cookies, setCookie ] = useCookies(["access_token", "user_id"]);
     const [form, setForm] = useState(INITIAL_STATE);
-
+    const [error, setError] = useState({submit_error:"", field_error: {}});
+    const [cookie, setCookie] = useCookies();
+    const navigate = useNavigate();
     const handleChange = (event) => {
         setForm({
             ...form,
             [event.target.id]: event.target.value,
         });
+        setError("");
     };
     
     const dirtyFields = getDirtyFields(form, INITIAL_STATE);
     const hasChanges  = Object.values(dirtyFields).every((isDirty) => !isDirty);
-
-    let errorFields = {};
+   
     const handleSubmit = async (event) => {
         event.preventDefault();
-        errorFields = getErrorFields(form, VALIDATION);
-        const hasErrors = Object.values(errorFields).flat().length > 0;
-        if (hasErrors) return;
+        const field_error = (getErrorFields(form, VALIDATION));
+        setError({...error, field_error: field_error});
+        const hasErrors = Object.values(field_error).flat().length > 0;
         
-        try
+        if (hasErrors)
         {
-            const form_data = new FormData();
-            form_data.append("username", form.email);
-            form_data.append("password", form.password1);
-            
-            const {access_token, user_id, expire } = await getToken(ENDPOINT, form_data);
+            console.log(field_error);
+            return;   
+        };
 
-            setCookie("access_token", access_token, {expires: expire});            
+        const result = await submit(form, error, setError, ENDPOINT);
+        if (result)
+        {
+            const { access_token, user_id, expire } = result;
+            setCookie("access_token", access_token, {expires: new Date(expire * 1000)});            
             setCookie("user_id", user_id);
-            navigate(location.state?.from?.pathname);
+            navigate("/");
         }
-        catch (error)
-        {
-            console.log(error)
-            console.info("Failed to get token");
-        }
-        
-        // navigate to home?
-    };
-
+            
+    }
+    
     return (
         <div>
             <h2>Registration Form</h2>
@@ -66,24 +62,33 @@ const SignUpForm = () => {
                 <AuthField 
                     id={"email"} 
                     value={form.email}  
-                    onChange={handleChange} 
-                    errorFields={errorFields}>
+                    onChange={handleChange}> 
                     Адрес эл. почты
-                </AuthField> 
+                </AuthField>
+                {error?.field_error?.email ? (
+                <span style={{ color: 'red' }}>
+                    {error?.field_error?.email[0]?.message}
+                </span>):null} 
                 <AuthField 
-                    id={"password1"} 
-                    value={form.password1}  
-                    onChange={handleChange} 
-                    errorFields={errorFields}>
+                    id={"password"} 
+                    value={form.password} 
+                    onChange={handleChange}>
                     Пароль
-                </AuthField> 
+                </AuthField>
+                {error?.field_error?.password ? (
+                <span style={{ color: 'red' }}>
+                    {error?.field_error?.password[0]?.message}
+                </span>):null}  
                 <AuthField 
                     id={"password2"} 
                     value={form.password2}  
-                    onChange={handleChange} 
-                    errorFields={errorFields}>
+                    onChange={handleChange} >
                     Подтвердите пароль
-                </AuthField> 
+                </AuthField>
+                {error?.field_error?.password2 ? (
+                <span style={{ color: 'red' }}>
+                    {error?.field_error?.password2[0]?.message}
+                </span>):null}   
             <button type="submit" disabled={hasChanges}>Зарегестрироваться</button>
             </form>
         </div>

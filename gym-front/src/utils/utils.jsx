@@ -1,6 +1,4 @@
 
-// if field changed
-
 const getDirtyFields = (form, initial_state) => {
     return  (
                 Object.keys(form).reduce((acc, key) => {
@@ -25,12 +23,12 @@ const getErrorFields = (form, restrictions) =>
         return { ...acc, [key]: errorsPerField };
     }, {})
    
-    if (form.hasOwnProperty('password1') && 
+    if (form.hasOwnProperty('password') && 
         form.hasOwnProperty('password2') && 
-        form["password1"] !== form["password2"])
+        form["password"] !== form["password2"])
     {
         errors["password2"].push({ isValid: false, 
-                message: "password1 and password2 must be same" }); 
+                message: "password and password2 must be same" }); 
     }
 
     return errors;

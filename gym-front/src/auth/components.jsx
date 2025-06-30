@@ -1,5 +1,5 @@
 
-const AuthField = ({ id, value, onChange, errorFields, children, type="text" }) => {
+const AuthField = ({ id, value, onChange,children, type="text" }) => {
     return (
         <div>
             <label htmlFor={id}>{children}</label>
@@ -9,11 +9,6 @@ const AuthField = ({ id, value, onChange, errorFields, children, type="text" }) 
                 value={value}
                 onChange={onChange}
             />
-            {errorFields.email?.length ? (
-                <span style={{ color: 'red' }}>
-                    {errorFields.email[0].message}
-                </span>
-            ) : null}
         </div>
 
     );

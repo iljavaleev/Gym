@@ -3,7 +3,7 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column
 )
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, ForeignKey
 
 class Base(DeclarativeBase):
     pass
@@ -34,3 +34,13 @@ class User(Base):
     email: Mapped[str]
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     __table_args__ = (UniqueConstraint("email", name="unique_email"),)
+
+
+class Exercise(Base):
+    __tablename__ = "user_exercise"
+    __table_args__ = (UniqueConstraint("user_id", "exercise", name="unique_user_ex"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("gym_user.id"))
+    exercise: Mapped[str]
+    
+    
