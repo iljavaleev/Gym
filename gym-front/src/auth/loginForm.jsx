@@ -18,7 +18,7 @@ const INITIAL_STATE = {
 const LoginForm = () => { 
     const [form, setForm] = useState(INITIAL_STATE);
     const [error, setError] = useState({submit_error:"", field_error: {}});
-    const [cookie, setCookie] = useCookies();
+    const [ _, setCookie] = useCookies();
     const location = useLocation();
     const navigate = useNavigate();
     const handleChange = (event) => {
@@ -50,8 +50,10 @@ const LoginForm = () => {
             const { access_token, user_id, expire } = result;
             setCookie("access_token", access_token, {expires: new Date(expire * 1000)});            
             setCookie("user_id", user_id);
-            navigate("/");
+            const origin = location.state?.from?.pathname || '/';
+            navigate(origin);
         }
+        
             
     }
     return (

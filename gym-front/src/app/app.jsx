@@ -5,9 +5,21 @@ import { LoginForm } from '../auth/loginForm';
 import { SignUpForm } from '../auth/signUpForm';
 import { Training } from '../training/training'
 import { Exercise } from '../exercise/exercise';
-import { Routes, Route, Outlet, NavLink } from 'react-router';
+import { Routes, Route, Outlet, NavLink, useLocation, Navigate} from 'react-router';
 import { useCookies } from "react-cookie";
 import './App.css'
+
+const ProtectedRoute = ({ children }) => {
+    const [ cookies ] = useCookies();
+    const location = useLocation();
+
+    if (!cookies.access_token) 
+    {
+        return <Navigate to="/login" replace state={{from: location}}/>;
+    }
+
+    return children;
+};
 
 
 const App = () => {
@@ -25,8 +37,8 @@ const App = () => {
         <Route index element={<Generic />} />
         <Route path="login" element={<LoginForm />}/>
         <Route path="register" element={<SignUpForm/>}/>
-        <Route path="my-training" element={<Training /> }/>
-        <Route path="my-exercise" element={<Exercise /> }/>
+        <Route path="my-training" element={<ProtectedRoute><Training /></ProtectedRoute>}/>
+        <Route path="my-exercise" element={<ProtectedRoute><Exercise /></ProtectedRoute>}/>
         <Route path="*" element={<NoMatch />} />
       </Route>
     </Routes>
@@ -50,9 +62,9 @@ const Layout = ( {token, onLogout} ) => {
       >
         <NavLink to="/" style={style}>Home</NavLink>
         <span> ... </span>
-        <NavLink to="/login" style={style}>Login</NavLink>
+        {!token && <NavLink to="/login" style={style}>Login</NavLink>}
         <span> ... </span>
-        <NavLink to="/register" style={style}>Register</NavLink>
+        {!token && <NavLink to="/register" style={style}>Register</NavLink>}
         <span> ... </span>
         {token && (
             <button type="button" onClick={onLogout}>
@@ -60,11 +72,11 @@ const Layout = ( {token, onLogout} ) => {
             </button>
         )}
         <span> ... </span>
-        { token &&
-          <NavLink to="/my-training" style={style}>MyTrainig</NavLink>}
+        
+        <NavLink to="/my-training" style={style}>MyTrainig</NavLink>
         <span> ... </span>
-        { token &&
-        <NavLink to="/my-exercise" style={style}>My exercise</NavLink>}
+        
+        <NavLink to="/my-exercise" style={style}>My exercise</NavLink>
       </nav>
 
       <main style={{ padding: "1rem 0" }}>

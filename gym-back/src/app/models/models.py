@@ -30,5 +30,5 @@ class UserInDB(User):
     hashed_password: str
 
 
-class UserExersise(BaseModel):
+class UserExercise(BaseModel):
     exercise: str

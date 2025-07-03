@@ -2,9 +2,9 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, HTTPException, status, FastAPI
 from sqlmodel import SQLModel
 from fastapi.middleware.cors import CORSMiddleware
-from routers import generic, auth
-from db_connection import get_engine
-from models.database import Base
+from app.routers import generic, auth, exercise
+from app.db_connection import get_engine
+from app.models.database import Base
 
 import logging
 
@@ -32,3 +32,4 @@ app.add_middleware(
 
 app.include_router(generic.router)
 app.include_router(auth.router)
+app.include_router(exercise.router)

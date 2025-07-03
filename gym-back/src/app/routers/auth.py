@@ -13,11 +13,11 @@ from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from psycopg2 import IntegrityError
 from pydantic import BaseModel
-from models.models import UserInDB, TokenData, Token
-from models.database import User
+from app.models.models import UserInDB, TokenData, Token
+from app.models.database import User
 from sqlalchemy.orm import Session
 import logging
-from db_connection import get_session
+from app.db_connection import get_session
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -40,7 +40,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def add_user(email: str, password: str, session: Session = get_session()) -> User | None:
+async def add_user(email: str, password: str,  session: Session) -> User | None:
     hashed_password = pwd_context.hash(password)
     db_user = User(email=email, hashed_password=hashed_password)
     session.add(db_user)
@@ -53,7 +53,7 @@ async def add_user(email: str, password: str, session: Session = get_session()) 
     return db_user
 
 
-async def get_user(email: str, session: Session = get_session()) -> UserInDB | None:
+async def get_user(email: str, session: Session) -> UserInDB | None:
     try:
         validate_email(email)
     except EmailNotValidError:
@@ -61,8 +61,8 @@ async def get_user(email: str, session: Session = get_session()) -> UserInDB | N
     return session.query(User).filter(User.email == email).first()
 
     
-async def authenticate_user(email: str, password: str) -> UserInDB:
-    user: UserInDB = await get_user(email)
+async def authenticate_user(email: str, password: str, session) -> UserInDB:
+    user: UserInDB = await get_user(email, session)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -82,8 +82,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 @router.post("/api/v1/login", status_code=status.HTTP_201_CREATED)
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user: UserInDB = await authenticate_user(form_data.username, form_data.password)
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[Session, Depends(get_session)]):
+    
+    user: UserInDB = await authenticate_user(form_data.username, form_data.password, session)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -98,18 +99,20 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 
 @router.post("/api/v1/register", status_code=status.HTTP_201_CREATED)
-async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user: UserInDB = await get_user(form_data.username)
-    if user:
+async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[Session, Depends(get_session)]):
+    try:
+        user: UserInDB = await get_user(form_data.username, session)
+    except Exception as e:
+        logger.error(e)    
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User with this email already exists",
             headers={"WWW-Authenticate": "Bearer"},
         )
     user: UserInDB = None
     try:
         user = await add_user(email=form_data.username, 
-                                    password=form_data.password)
+                                    password=form_data.password, session=session)
     except IntegrityError as e:
         logger.error(e)
         raise HTTPException(
