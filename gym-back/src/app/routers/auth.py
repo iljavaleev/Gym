@@ -13,11 +13,11 @@ from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from psycopg2 import IntegrityError
 from pydantic import BaseModel
-from app.models.models import UserInDB, TokenData, Token
-from app.models.database import User
+from models.models import UserInDB, TokenData, Token
+from models.database import User
 from sqlalchemy.orm import Session
 import logging
-from app.db_connection import get_session
+from db_connection import get_session
 
 # to get a string like this run:
 # openssl rand -hex 32
