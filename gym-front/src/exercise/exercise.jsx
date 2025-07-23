@@ -13,8 +13,15 @@ const Exercise = () => {
         (async () => {
             try
             {
-                const user_data = await getUserExs(cookies.user_id);
-                setUserExs(user_data); 
+                if (cookies.access_token)
+                {
+                    const user_data = await getUserExs(cookies.access_token);
+                    setUserExs(user_data); 
+                }
+                else
+                {
+                    setUserExs([]); 
+                }
             }
             catch (error)
             {
@@ -30,12 +37,13 @@ const Exercise = () => {
     const onDelete = async(id) => {
         try
         {   
-            await deleteUserEx(cookies.user_id, { id: id });
+            if (cookies.access_token)
+                await deleteUserEx(id, cookies.access_token);
             setUserExs({data: userExs.data.filter(it => it.id !== id)});
         }
         catch(error)
         {
-            logger.error(error);
+            console.error(error);
         }
     };
 

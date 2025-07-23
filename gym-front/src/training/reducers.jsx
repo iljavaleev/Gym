@@ -1,8 +1,10 @@
 const to_add_ex = {
-    title: "",
+    count: null,
+    exercise: {id: null, title: ""},
     load: [
         {reps: null, expect: null, fact: null}
-    ]
+    ],
+    error: null
 };
 
 const to_add_set = {reps: null, expect: null, fact: null};
@@ -19,13 +21,6 @@ const trainingReducer = (state, action) => {
                 isError: false };
         case 'TRAINING_FETCH_FAILURE':
             return { ...state, isLoading: false, isError: true };
-        case 'TRAINING_UPDATE':
-            return { ...state, 
-                data: action.payload, 
-                isLoading: false, 
-                isError: false,
-                isCruError: false 
-            }
         case 'TRAINING_CRU_FAILURE':
             return { ...state, isCruError: true };
         case 'TRAINING_CRU_SUCCESS':

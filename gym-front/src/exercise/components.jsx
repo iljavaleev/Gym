@@ -10,25 +10,27 @@ const AddUserEx = ({ data, onDataChange }) => {
     const [ add, setAdd ] = useState(false);
     const [ subm, setSubmit ] = useState(false);
     const [ ex, setEx ] = useState({ isError: false, errorMsg: "",
-        isSuccess: false, title:"" });
+        isSuccess: false, exercise:"" });
     
     useEffect(() => {
         if (!subm) return;
-        if (!ex.title) return;
-        const user_id = cookies.user_id;
+        if (!ex.exercise) return;
+        if (!cookies.access_token) return;
         try
         {   
-        
-            const pr_id = postUserEx(user_id, { title: ex.title });
-            pr_id.then(id => {
-                data.push({ id: id, title: ex.title});
+            
+            const pr_id = postUserEx({ exercise: ex.exercise }, cookies.access_token);
+            
+            pr_id.then(dbex => {
+                data.push({ id: dbex.data.id, exercise: dbex.data.exercise});
                 onDataChange(data);
-                setEx({ title:"", isError: false, isSuccess: true });
+                setEx({ exercise:"", isError: false, isSuccess: true });
             });
            
         }
-        catch
+        catch (error)
         {
+            console.log(error)
             setEx({ ...ex, isError: true, errorMsg: "Ошибка. Попробуйте позднее" });
         }   
         setSubmit(false);
@@ -40,12 +42,12 @@ const AddUserEx = ({ data, onDataChange }) => {
     }
 
     const onChange = (event) => { setEx({ ...ex,  
-        title: event.target.value, isError: false, errorMsg: "" }); }
+        exercise: event.target.value, isError: false, errorMsg: "" }); }
     
     const onClick = () => { 
-        for (const validation of VALIDATION.title)
+        for (const validation of VALIDATION.exercise)
         {
-            if (!validation.isValid(ex.title))
+            if (!validation.isValid(ex.exercise))
             {
                 setEx({...ex, isError: true, errorMsg: validation.message});
                 return;
@@ -60,7 +62,7 @@ const AddUserEx = ({ data, onDataChange }) => {
             <Button onClick={handleClickOpen}>{add ? "Закрыть" : "Создать новое"}</Button>
             {
                 add && <div>
-                <InputWithLabel value={ex.title} onInputChange={onChange} >Введите название</InputWithLabel>
+                <InputWithLabel value={ex.exercise} onInputChange={onChange} >Введите название</InputWithLabel>
                 <Button onClick={onClick}>Отправить</Button>
                 { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                 { ex.isSuccess && <strong>SUCCESS</strong> }
@@ -74,7 +76,7 @@ const ListEx = ({ list, onDelete }) => {
     return (
         <ul>
             {list.map((item) => (
-                <Item key={item.id} item={item.title} onDelete={() => onDelete(item.id)}/>
+                <Item key={item.id} item={item.exercise} onDelete={() => onDelete(item.id)}/>
             ))}
         </ul>
     );

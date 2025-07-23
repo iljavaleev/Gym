@@ -1,150 +1,91 @@
 import { VALIDATION } from "./validation";
+import axios from "axios";
 
-const mock_data = [
-    { 
-        title: "отжимания",
-        load: [
-            {reps: 20, expect: 10, fact: null},
-            {reps: 20, expect: 10, fact: null},
-            {reps: 20, expect: 10, fact: null}
-        ]
-    }, 
-    { 
-        title: "приседания",
-        load: [
-            {reps: 30, expect: 20, fact: null},
-            {reps: 30, expect: 20, fact: null},
-            {reps: 30, expect: 20, fact: null}
-        ]
-    }
-]
+const getInitialQuery = () => 
+    `http://localhost:8000/api/v1/user-next-training?date=${Date.now()}`
 
 
-const getTrainingByDate = async (url) => {
-    const result = "aaa";
-    // const result = await axios(url);
-    return new Promise((resolve, error) => {
-            if (result)
-                resolve({ data:  mock_data  }); // result.data
-            else
-                error(new Error());
-        }
-    );
-}
+const formatGetDelTrainigUrl = (date) => 
+    `http://localhost:8000/api/v1/user-training?date=${date}`
+
+const POST_TRAINING_URL = "http://localhost:8000/api/v1/user-training";
 
 
-const postTrainingByDate = async (url, payload) => {
-    // let result = null;
-    // try
-    // {
-    //     result = await axios.post(url, payload);
-    // }
-    // catch (error)
-    // {
-    //     console.error("failed to post data");
-    // }
-    
-    // return new Promise((resolve, error) => {
-    //         if (result)
-    //             resolve();
-    //         else
-    //             error(new Error());
-    //     }
-    // );
-    return new Promise((resolve, error) => {
-            if (payload)
-            {
-                console.log(payload);
-                resolve();
-            }
-            else
-                error(new Error());
-        }
-    );
-}
-
-
-const delTrainingByDate = async (url, date) => {
-    const result = "aaa";
-    // const result = await axios(url);
-    return new Promise((resolve, error) => {
-            if (result)
-                resolve({ data:  []  }); // result.data
-            else
-                error(new Error());
-        }
-    );
-}
-
-
-const formatDateUrl = (date, user) =>  
-    `http://localhost:8000/api/v1/search-by-date?user=${user}&date=${date}`;
-
-
-const formatPostTraingUrl = (user) => 
-    `http://localhost:8000/api/v1/user-training?user=${user}`;
-
-
-const getInitialQuery = (id) => {
-    if (id)
-        return formatDateUrl(Date.now(), id);
-    return "";
+const getTrainingByDate = async (url=formatGetDelTrainigUrl(), token) => {
+    return await axios.get(
+        url, 
+        { headers: {"Authorization" : `Bearer ${token}`} });
 };
 
 
-const showError = (element, message) => {
-    document.querySelector("#" + element + "-error").classList.add("display-error");
-    document.querySelector("#" + element + "-error").innerHTML = message;
-}; 
+const postTrainingByDate = async (payload, token) => {
+    return await axios.post(
+        POST_TRAINING_URL, 
+        payload, 
+        { headers: {"Authorization" : `Bearer ${token}`}});
+}
+
+
+const delTrainingByDate = async (date, token) => {
+    await axios.delete(
+        formatGetDelTrainigUrl(date), 
+        { headers: {"Authorization" : `Bearer ${token}`}}
+    );
+}
 
 
 const validateField = (field, obj) => {
     for (const validation of VALIDATION[field])
     {
-        if (!validation.isValid(obj.value))
+        if (!validation.isValid(obj))
         {
-            showError(obj.id, validation.message);
-            return 1;
+            return validation.message;
         }
     }
-    return 0;
+    return null;
 }
 
 
-const dataFromForm = (event) => 
+const dataHasErrors = (form) => 
 {
-    let errors = [];
-    const new_data = Array.from(event.target.getElementsByClassName("exercise")).map(element => {
-        const exercise = {}
-        const title = element.querySelector(".title");
-        errors.push(validateField("title", title));
-        exercise.title = title.value;
+    if (!form)
+        return true;
+    console.log(form);
+    for (let i=0; i < form.length; i++)
+    {
+        let message = null;
+        
+        if (message=validateField("exercise", form[i].exercise)) 
+        {  
+            form[i].error = message;
+            return true;
+        }
 
-        exercise.load = Array.from(element.getElementsByClassName("load")).map(element => {
-            const load = {};
-            const reps = element.querySelector(".reps");
-            errors.push(validateField("reps", reps));
-            load.reps = reps.value;
-
-            const expect = element.querySelector(".expect");
-            errors.push(validateField("expect", expect));
-            load.expect = expect.id;
-            
-            const fact = element.querySelector(".fact");
-            errors.push(validateField("fact", fact));
-            load.fact = fact.value;
-            return load;
-        });
-       
-        return exercise;
-    });
-    const sumWithInitial = errors.reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        0,
-    );
-    return [new_data, sumWithInitial ? true : false];
+        for (let sub_element of form[i].load)
+        {
+            if (message=validateField("reps", sub_element.reps)) 
+            {
+                form[i].error = message;
+                return true;
+            }    
+            if (message=validateField("expect", sub_element.expect)) 
+            {
+                form[i].error = message;
+                return true;
+            }    
+                
+            if (message=validateField("fact", sub_element.fact)) 
+            {
+                form[i].error = message;
+                return true;
+            }
+                
+        };
+        form[i].error = null;
+    }
+    return false;
 }
 
 
 export { delTrainingByDate, postTrainingByDate, getTrainingByDate, 
-    getInitialQuery, dataFromForm }
+    getInitialQuery, dataHasErrors, formatGetDelTrainigUrl }

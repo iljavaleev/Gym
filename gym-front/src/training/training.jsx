@@ -7,19 +7,43 @@ import { getTrainingByDate,
     postTrainingByDate, 
     delTrainingByDate,
     getInitialQuery, 
-    dataFromForm 
+    dataHasErrors,
+    formatGetDelTrainigUrl 
 } from './utils'; 
+import { getUserExs } from '../exercise/utils';
+
+// {
+//   "date": "2025-07-16T15:54:56.070Z",
+//   "training": [
+//     {
+//       "count": 0,
+//       "exercise": {
+//         "id": 0,
+//         "title": "string"
+//       },
+//       "load": [
+//         {
+//           "reps": 0,
+//           "expect": 0,
+//           "fact": 0
+//         }
+//       ]
+//     }
+//   ]
+// }
 
 
+// /api/v1/user-exercise
 
 const Training = () => {
-    const [ cookies, setCookie ] = useCookies();
-    const [ trainingDate, setTrainigDate ] = useState({ date: null, isDateError: false });
+    const [ cookies ] = useCookies();
+    const [ trainingDate, setTrainigDate ] = useState({ date: "", isDateError: false });
+    
     const handleGetSubmit = (event) => {
-        setUrl(formatDateUrl(trainingDate.date, 1)); //mock
+        setUrl(formatGetDelTrainigUrl(trainingDate.date)); //mock
         event.preventDefault();
     };
-
+    
     const handleChangeDate = (event) => {
         setTrainigDate({ isDateError: false, date: event.target.value});
     };
@@ -30,44 +54,41 @@ const Training = () => {
         { data: [], isLoading: false, isError:false, isCruError: false }
     );
     
+    // console.log(trainingForm.data);
+    
     // url
-    const [url, setUrl] = useState(getInitialQuery(1));  //mock
+    const [url, setUrl] = useState(getInitialQuery());
     
     const handleUpdateSubmit = (event) => {
-        let new_data = null;
+        event.preventDefault();
         let hasErrors = null;
         try
-        {
-           [new_data, hasErrors] = dataFromForm(event);
+        {                           
+            hasErrors = dataHasErrors(trainingForm.data);
         }
         catch(error)
         {
             console.error(error);
         }
-        
-        if (!trainingDate.date)
-        {
-            setTrainigDate({...trainingDate, isDateError: true});
-            console.log(trainingDate.date)
-            event.preventDefault();
-            return;
-        }
-
-        if (hasErrors )
+        if (hasErrors)
         {
             dispatchTraining({ type: 'TRAINING_CRU_FAILURE' });
             event.preventDefault();
             return;
         }
 
-        dispatchTraining({ type: "TRAINING_UPDATE", payload: new_data });
-        setCookie("user_id", 1); /// mock
-                        
+        if (!trainingDate.date)
+        {
+            setTrainigDate({...trainingDate, isDateError: true});
+            event.preventDefault();
+            return;
+        }
+
         try
         {
             postTrainingByDate(
-                getInitialQuery(cookies.user_id), 
-                {trainingForm: new_data, date: trainingDate}
+                {date: trainingDate.date, training: trainingForm.data},
+                cookies.access_token
             );
             dispatchTraining({ type: 'TRAINING_CRU_SUCCESS' });
         }
@@ -76,27 +97,34 @@ const Training = () => {
             console.log(error)
             dispatchTraining({ type: 'TRAINING_CRU_FAILURE' }); // 
         }
-        event.preventDefault();
     };
 
+    // get training date on url change
+    
+    
+    
+    
     useEffect(() => {
         dispatchTraining({ type: 'TRAINING_FETCH_INIT' });
         (async () => {
             try
             {
-                const result = await getTrainingByDate(url);
+                const result = await getTrainingByDate(url, cookies.access_token);
                 dispatchTraining(
-                    { type: "TRAINING_FETCH_SUCCESS", payload: result.data }
+                    { type: "TRAINING_FETCH_SUCCESS", payload: result.data?.training }
                 );
+                setTrainigDate({ ...trainingDate, date: new Date(result.data.date).toISOString().split(".")[0]});
             }
             catch (error)
             {
+                console.log(error)
                 dispatchTraining({ type: 'TRAINING_FETCH_FAILURE' });
             }
         })();   
 
        
     }, [url]);
+
 
     const handleExAdd = () => {
        dispatchTraining({ type: 'EX_ADD' }); 
@@ -122,14 +150,14 @@ const Training = () => {
     return (
         <>
             <DateTimeForm 
-                searchTerm={trainingDate} 
+                searchTerm={trainingDate.date} 
                 onSubmit={handleGetSubmit}
                 onChange={handleChangeDate}
             />
 
-            {trainingDate.isDateError && <p>Wrong Date </p>}
-            {trainingForm.isError && <p>Something went wrong ...</p>}
-            {trainingForm.isLoading ? ( <p>Loading ...</p> ) : 
+            {trainingDate.isDateError && <p>Неправильно указана дата</p>}
+            {trainingForm.isError && <p>Что-то пошло не так...</p>}
+            {trainingForm.isLoading ? ( <p>Загружаем данные...</p> ) : 
                 ( 
                     <TrainingFormList 
                         list={trainingForm.data} 
