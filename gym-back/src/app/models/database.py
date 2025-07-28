@@ -4,8 +4,9 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column
 )
-from sqlalchemy import DateTime, UniqueConstraint, ForeignKey
+from sqlalchemy import DateTime, Integer, UniqueConstraint, ForeignKey
 from sqlalchemy import CheckConstraint
+from uuid import uuid4, UUID
 
 class Base(DeclarativeBase):
     pass
@@ -40,30 +41,32 @@ class User(Base):
 
 class Exercise(Base):
     __tablename__ = "user_exercise"
-    __table_args__ = (UniqueConstraint("user_id", "exercise", name="unique_user_ex"),)
+    __table_args__ = (UniqueConstraint("user_id", "title", name="unique_user_ex"),)
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("gym_user.id"))
-    exercise: Mapped[str]
+    user_id: Mapped[int] = mapped_column(ForeignKey("gym_user.id"), nullable=True)
+    title: Mapped[str]
     
 # many to many user - exercise
 class Workout(Base):
     __tablename__ = "workout"
     __table_args__ = (
-        UniqueConstraint("user_id", "exercise", name="unique_workout_ex")
+        UniqueConstraint("date", "user_id", "exercise", name="unique_workout_ex"),
+        UniqueConstraint("count", "date", name="unique_count_ex"),
     )
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("gym_user.id"), ondelete="CASCADE"
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    count:  Mapped[int] = mapped_column(nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, 
+        ForeignKey("gym_user.id", ondelete="CASCADE")
     )
-    exercise: Mapped[int] = mapped_column(ForeignKey("user_exercise.id"))
-    date: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), 
+    exercise: Mapped[int] = mapped_column(ForeignKey("user_exercise.id", ondelete="SET NULL"))
+    date: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), 
                                                     nullable=False)
     
 class Load(Base):
     __tablename__ = "load"
     id: Mapped[int] = mapped_column(primary_key=True)
-    workout: Mapped[int] = mapped_column(
-        ForeignKey("workout.id"), ondelete="CASCADE"
+    workout: Mapped[UUID] = mapped_column(
+        ForeignKey("workout.id", ondelete="CASCADE")
     )
     reps: Mapped[int] = mapped_column(nullable=False)
     expect: Mapped[int] = mapped_column(nullable=True)
@@ -95,7 +98,7 @@ class Load(Base):
 
 # if __name__ == "__main__":
 #     stmnt = (
-#         select(Exercise.exercise, Load.reps, Load.expect, Load.fact)      
+#         select(Exercise.title, Load.reps, Load.expect, Load.fact)      
 #         .where(Workout.date == '01-01-2002 10:30:00')
 #         .select_from(Workout)
 #         .join(Load, Load.workout == Workout.id)

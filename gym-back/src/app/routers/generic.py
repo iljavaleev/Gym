@@ -1,7 +1,7 @@
 from typing import Annotated
-from models.database import Strength, Endurance
-from models.models import EnduranceTrainingResp, StrenghtTrainigResp
-from db_connection import get_session
+from app.models.database import Strength, Endurance
+from app.models.models import EnduranceTrainingResp, StrenghtTrainigResp
+from app.db_connection import get_session
 from sqlalchemy.orm import Session
 from fastapi import Depends, status, APIRouter
 

@@ -1,11 +1,10 @@
 import pytest
-import uuid
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 from app.main import app
-from app.models.database import Base, User, Strength, Endurance
+from app.models.database import Base
 from app.db_connection import get_session
 import logging
 
