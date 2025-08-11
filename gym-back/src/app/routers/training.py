@@ -70,14 +70,14 @@ def get_training(date: Annotated[datetime, Query()],
 
 
 @router.get("/api/v1/user-next-training", status_code=status.HTTP_200_OK)
-def get_next_training(date: int, 
-                user: Annotated[UserInDB, Depends(get_current_user)], 
-                session: Annotated[Session, Depends(get_session)]
+def get_next_training(user: Annotated[UserInDB, Depends(get_current_user)], 
+    session: Annotated[Session, Depends(get_session)]
 ) -> UserTraining | None:    
-    date = datetime.fromtimestamp(date/1000)
+    date = datetime.now()
     subq = (
         select(Workout.date.label("date"))
         .where((Workout.date >= date) & (Workout.user_id == user.id))
+        .order_by(Workout.date)
         .limit(1).scalar_subquery()
     )
     stmnt = (

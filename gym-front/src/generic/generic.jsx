@@ -3,10 +3,40 @@ import { useStorageState } from "../customhooks/hooks"
 import { List } from "./components";
 import { useReducer, useState, useEffect } from "react";
 import axios from 'axios';
+import styled from 'styled-components';
 
+const StyledGenContainer = styled.div`
+    display: flex;
+    gap: var(--gap-size);
 
-// const formatUrl = (book, number) =>  
-//     `http://0.0.0.0:5555/api/v1/search?book=${book}&number=${number}`;
+    .program
+    {   
+        border-radius: 15px;
+        background-color: #fff;
+        padding: 1.5em;
+    }
+
+    .program-choice
+    {
+        flex: 1;
+    }
+
+    .program-search
+    {   
+        flex: 1;
+    }
+
+    .program-search-label
+    {
+        font-family: Georgia, serif;
+    }
+
+    button
+    {
+        border-radius: 5px;
+    }
+`;
+
 
 const formatUrl = (book, number) =>  
     `http://localhost:8000/api/v1/search?book=${book}&number=${number}`;
@@ -89,20 +119,30 @@ const Generic = () => {
     }, [url]);
 
     const handleSearch = (event) => { setSearchNumberTerm(event.target.value); };
-
     return (
-        <>
-            <Button onClick={() => setBookTerm(0)}>Пауэрлифтинг</Button>
-            <Button onClick={() => setBookTerm(1)}>Похудайка</Button>
-            
-            <SearchForm searchTerm={searchNumberTerm} 
-                        onSearchSubmit={handleSearchSubmit} 
-                        onSearchInput={handleSearch}/>
-                
-            {stories.isError && <p>Something went wrong ...</p>}
-            {stories.isLoading ? ( <p>Loading ...</p> ) : 
-                ( <List list={stories.data} /> )}
-        </>
+        <StyledGenContainer>
+            <div className="program-choice program">
+                <div>
+                    <span className="program-search-label">Выберите программу:</span><br/>
+                    &nbsp;
+                    <Button  style={{ backgroundColor: !bookTerm ? "green" : "white"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>
+                    <Button  style={{ backgroundColor: bookTerm ? "green" : "white"}} onClick={() => setBookTerm(1)} >Похудайка</Button>
+                </div>
+                <div>
+                    <SearchForm searchTerm={searchNumberTerm} 
+                                onSearchSubmit={handleSearchSubmit} 
+                                onSearchInput={handleSearch}
+                                lbl="Введите номер тренировки:"
+                                cls="program-search-label"
+                                br={true}/>
+                </div>
+            </div>
+            <div className="program-search program">
+                {stories.isError && <p>Something went wrong ...</p>}
+                {stories.isLoading ? ( <p>Loading ...</p> ) : 
+                    ( <List list={stories.data} /> )}
+            </div>
+        </StyledGenContainer>
     );
 };
 

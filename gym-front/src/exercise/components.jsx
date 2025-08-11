@@ -1,32 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { InputWithLabel, Button } from "../components/components";
-
 import { postUserEx } from "./utils";
 import { useCookies } from "react-cookie";
 import { VALIDATION } from "./validation";
+import { UserDataContext } from "../app/appContext";
+import { useNavigate } from "react-router";
 
-const AddUserEx = ({ data, onDataChange }) => {
+
+const AddUserEx = ({ onDataChange }) => {
+    const navigate = useNavigate();
+    
     const [ cookies ] = useCookies();    
     const [ add, setAdd ] = useState(false);
     const [ subm, setSubmit ] = useState(false);
-    const [ ex, setEx ] = useState({ isError: false, errorMsg: "",
-        isSuccess: false, exercise:"" });
+    const [ ex, setEx ] = useState({ 
+        isError: false, 
+        errorMsg: "", 
+        isSuccess: false, title:"" 
+    });
     
+    const data = useContext(UserDataContext);
+
     useEffect(() => {
         if (!subm) return;
-        if (!ex.exercise) return;
+        if (!ex.title) return;
         if (!cookies.access_token) return;
+        
         try
         {   
-            
-            const pr_id = postUserEx({ exercise: ex.exercise }, cookies.access_token);
-            
-            pr_id.then(dbex => {
-                data.push({ id: dbex.data.id, exercise: dbex.data.exercise});
-                onDataChange(data);
-                setEx({ exercise:"", isError: false, isSuccess: true });
-            });
-           
+            (async () => {
+                const result = await postUserEx({ title: ex.title }, 
+                    cookies.access_token);
+                data.push({ id: result.data.id, title: result.data.title});
+                onDataChange([...data]);
+                setEx({ title:"", isError: false, isSuccess: true });
+            })();
         }
         catch (error)
         {
@@ -42,12 +50,12 @@ const AddUserEx = ({ data, onDataChange }) => {
     }
 
     const onChange = (event) => { setEx({ ...ex,  
-        exercise: event.target.value, isError: false, errorMsg: "" }); }
+        title: event.target.value, isError: false, errorMsg: "" }); }
     
     const onClick = () => { 
-        for (const validation of VALIDATION.exercise)
+        for (const validation of VALIDATION.title)
         {
-            if (!validation.isValid(ex.exercise))
+            if (!validation.isValid(ex.title))
             {
                 setEx({...ex, isError: true, errorMsg: validation.message});
                 return;
@@ -57,26 +65,32 @@ const AddUserEx = ({ data, onDataChange }) => {
     
     }
     
+    const handleToTraining = () => {
+        navigate("/my-training");
+    }
+
     return (
         <>
             <Button onClick={handleClickOpen}>{add ? "Закрыть" : "Создать новое"}</Button>
             {
                 add && <div>
-                <InputWithLabel value={ex.exercise} onInputChange={onChange} >Введите название</InputWithLabel>
+                <InputWithLabel value={ex.title} onInputChange={onChange} >Введите название</InputWithLabel>
                 <Button onClick={onClick}>Отправить</Button>
                 { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                 { ex.isSuccess && <strong>SUCCESS</strong> }
                 </div>
             }
+            <Button onClick={handleToTraining}>Обратно к тренировке</Button>
         </>
     );
 }
 
-const ListEx = ({ list, onDelete }) => {
+const ListEx = ({ onDelete }) => {
+    const list = useContext(UserDataContext);
     return (
         <ul>
             {list.map((item) => (
-                <Item key={item.id} item={item.exercise} onDelete={() => onDelete(item.id)}/>
+                <Item key={item.id} item={item.title} onDelete={() => onDelete(item.id)}/>
             ))}
         </ul>
     );

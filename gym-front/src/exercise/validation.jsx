@@ -1,5 +1,5 @@
 const VALIDATION = {
-    exercise: [
+    title: [
         {
             isValid: (value) => !!value,
             message: 'Поле не может быть пустым',

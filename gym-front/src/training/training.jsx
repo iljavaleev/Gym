@@ -1,16 +1,18 @@
-import { useState, useReducer, useEffect } from 'react';
+import { useState, useReducer, useEffect, useRef, useContext } from 'react';
 import { trainingReducer } from './reducers';
 import { useCookies } from 'react-cookie'
 import { TrainingFormList, DateTimeForm } from './components';
 import { Button } from '../components/components';
 import { getTrainingByDate, 
     postTrainingByDate, 
-    delTrainingByDate,
-    getInitialQuery, 
+    delTrainingByDate, 
     dataHasErrors,
-    formatGetDelTrainigUrl 
+    formatGetDelTrainigUrl, 
+    getInitialQueryUrl
 } from './utils'; 
-import { getUserExs } from '../exercise/utils';
+import { useNavigate } from "react-router";
+import { UserDataContext } from "../app/appContext";
+import { trainingData } from './data';
 
 // {
 //   "date": "2025-07-16T15:54:56.070Z",
@@ -33,19 +35,25 @@ import { getUserExs } from '../exercise/utils';
 // }
 
 
-// /api/v1/user-exercise
-
 const Training = () => {
+    const navigate = useNavigate();
     const [ cookies ] = useCookies();
-    const [ trainingDate, setTrainigDate ] = useState({ date: "", isDateError: false });
-    
-    const handleGetSubmit = (event) => {
-        setUrl(formatGetDelTrainigUrl(trainingDate.date)); //mock
-        event.preventDefault();
-    };
+    const [ trainingDate, setTrainigDate ] = useState({ date: "", time:"", 
+        isDateError: false });
+    const [ successState, setSuccessState ] = useState({isCruSuccess: false, 
+        isDeleteSuccess: false});
+    const changed = useRef(false);
     
     const handleChangeDate = (event) => {
-        setTrainigDate({ isDateError: false, date: event.target.value});
+        setTrainigDate({ ...trainingDate, date: event.target.value, 
+            isDateError: false});
+        changed.current = true;
+    };
+
+    const handleChangeTime = (event) => {
+        setTrainigDate({ ...trainingDate, time: event.target.value, 
+            isDateError: false});
+        changed.current = true;
     };
 
     // training data
@@ -53,29 +61,86 @@ const Training = () => {
         trainingReducer, 
         { data: [], isLoading: false, isError:false, isCruError: false }
     );
-    
-    // console.log(trainingForm.data);
-    
-    // url
-    const [url, setUrl] = useState(getInitialQuery());
-    
-    const handleUpdateSubmit = (event) => {
+
+    useEffect(() => {
+        let data = localStorage.getItem("training");
+        if (data)
+        {   
+            data = JSON.parse(data);
+            dispatchTraining(
+                { 
+                    type: "TRAINING_FETCH_SUCCESS", 
+                    payload: data.training 
+                }
+            );
+            setTrainigDate({ ...trainingDate, date: data.date, time: data.time});
+        }            
+    }, []);
+
+
+
+    const handleGetSubmit = async (event) => {
         event.preventDefault();
-        let hasErrors = null;
+        
+        const action = event.nativeEvent.submitter.name;
+        let url = null;
+
+        if (action === "next")
+            url = getInitialQueryUrl();
+        else
+            url = formatGetDelTrainigUrl(
+                `${trainingDate.date}T${trainingDate.time}`
+            );
+
         try
-        {                           
-            hasErrors = dataHasErrors(trainingForm.data);
-        }
-        catch(error)
         {
-            console.error(error);
+            const result = await getTrainingByDate(url, cookies.access_token);
+            dispatchTraining(
+                { 
+                    type: "TRAINING_FETCH_SUCCESS", 
+                    payload: result.data?.training 
+                }
+            );
+            let [date, time] = result.data.date.split("T")
+            time = time.slice(0, 5);
+            setTrainigDate({ ...trainingDate, date: date, time: time});
+            localStorage.setItem("training", JSON.stringify(
+                {training: result.data.training, date: date, time:time}));
         }
-        if (hasErrors)
+        catch (error)
         {
-            dispatchTraining({ type: 'TRAINING_CRU_FAILURE' });
-            event.preventDefault();
+            console.log(error)
+            dispatchTraining({ type: 'TRAINING_FETCH_FAILURE' });
+        }
+    };
+
+    const userExs = useContext(UserDataContext);
+
+    const handleUpdateSubmit = async (event) => {
+        event.preventDefault();
+        if (!changed.current)
+        { 
+            return; 
+        }
+                 
+
+        if (!(trainingDate.date && trainingDate.time))
+        {
+            setTrainigDate({...trainingDate, isDateError: true });
             return;
         }
+
+        try
+        {                           
+            if (dataHasErrors(trainingForm.data, trainingData.concat(userExs)))
+            {
+                dispatchTraining({ type: 'TRAINING_CRU_FAILURE' });
+                event.preventDefault();
+                return;
+            }
+        }
+        catch(error){ console.error(error); }
+
 
         if (!trainingDate.date)
         {
@@ -87,76 +152,74 @@ const Training = () => {
         try
         {
             postTrainingByDate(
-                {date: trainingDate.date, training: trainingForm.data},
+                {date: `${trainingDate.date}T${trainingDate.time}`, 
+                    training: trainingForm.data},
                 cookies.access_token
             );
-            dispatchTraining({ type: 'TRAINING_CRU_SUCCESS' });
         }
         catch (error)
         {
             console.log(error)
             dispatchTraining({ type: 'TRAINING_CRU_FAILURE' }); // 
+            return;
         }
+        dispatchTraining({ type: 'TRAINING_CRU_SUCCESS' });
+        localStorage.setItem("training", JSON.stringify(
+            {
+                training: trainingForm.data, 
+                date: trainingDate.date, 
+                time:trainingDate.time
+            })
+        );
+
+        setSuccessState({...successState, isCruSuccess: true});
+        setTimeout(() => {
+            setSuccessState({...successState, isCruSuccess: false});
+        }, 3000);
+        
+        changed.current = false;
     };
 
-    // get training date on url change
-    
-    
-    
-    
-    useEffect(() => {
-        dispatchTraining({ type: 'TRAINING_FETCH_INIT' });
-        (async () => {
-            try
-            {
-                const result = await getTrainingByDate(url, cookies.access_token);
-                dispatchTraining(
-                    { type: "TRAINING_FETCH_SUCCESS", payload: result.data?.training }
-                );
-                setTrainigDate({ ...trainingDate, date: new Date(result.data.date).toISOString().split(".")[0]});
-            }
-            catch (error)
-            {
-                console.log(error)
-                dispatchTraining({ type: 'TRAINING_FETCH_FAILURE' });
-            }
-        })();   
-
-       
-    }, [url]);
-
-
-    const handleExAdd = () => {
-       dispatchTraining({ type: 'EX_ADD' }); 
+    const handleExAdd = () => { 
+        dispatchTraining({ type: 'EX_ADD' });
+        changed.current = true; 
     };
-
-    const handleExDel = () => {
-        dispatchTraining({ type: 'EX_DEL' }); 
+    const handleExDel = () => { 
+        dispatchTraining({ type: 'EX_DEL' });
+        changed.current = true;  
     };
 
     const addSet = (idx) => {
-       dispatchTraining({ type: 'SET_ADD', idx: idx }); 
+        dispatchTraining({ type: 'SET_ADD', idx: idx });
+        changed.current = true; 
     };
-
     const delSet = (idx) => {
-        dispatchTraining({ type: 'SET_DEL', idx: idx }); 
+        dispatchTraining({ type: 'SET_DEL', idx: idx });
+        changed.current = true; 
     };
 
     const handleDelTraining = () => {
-        delTrainingByDate(url, date); // change url
+        delTrainingByDate(`${trainingDate.date}T${trainingDate.time}`, 
+            cookies.access_token); // change url
         dispatchTraining({ type: 'TRAINING_DEL' });
+        setSuccessState({...successState, isDeleteSuccess: true});
+            setTimeout(() => {
+                setSuccessState({...successState, isDeleteSuccess: false});
+        }, 3000);
     }
 
     return (
         <>
             <DateTimeForm 
-                searchTerm={trainingDate.date} 
+                searchTerm={trainingDate} 
                 onSubmit={handleGetSubmit}
-                onChange={handleChangeDate}
+                onChangeDate={handleChangeDate}
+                onChangeTime={handleChangeTime}
             />
 
             {trainingDate.isDateError && <p>Неправильно указана дата</p>}
             {trainingForm.isError && <p>Что-то пошло не так...</p>}
+            {trainingForm.isCruError && <p>Ошибка. Данные не сохранены</p> }
             {trainingForm.isLoading ? ( <p>Загружаем данные...</p> ) : 
                 ( 
                     <TrainingFormList 
@@ -166,11 +229,17 @@ const Training = () => {
                         delSet={delSet}
                         addEx={handleExAdd}
                         delEx={handleExDel}
+                        changed={changed}
                     /> 
                 )
             }
+            {successState.isCruSuccess && <p>Тренировка успешно сохранена</p>}
+            {successState.isDeleteSuccess && <p>Тренировка успешно удалена</p>}
             <hr/>
-            {trainingForm.data && <Button onSubmit={handleDelTraining}>Удалить тренировку</Button>}
+            {Boolean(trainingForm.data.length) && 
+                <Button onClick={handleDelTraining}>Удалить тренировку</Button>}
+            
+            <Button onClick={()=>{navigate("/my-training/exercise")}}>Создать свое упражнение</Button>
         </>
     ); 
 };

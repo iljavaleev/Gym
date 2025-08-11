@@ -24,10 +24,14 @@ const trainingReducer = (state, action) => {
         case 'TRAINING_CRU_FAILURE':
             return { ...state, isCruError: true };
         case 'TRAINING_CRU_SUCCESS':
-            return { ...state, isCruError: false };
+            return { ...state, isCruError: false, isCruSuccess: true };
         case 'EX_ADD':
-            state.data.push(JSON.parse(JSON.stringify(to_add_ex)));
-            return { ...state,
+            const newEl = JSON.parse(JSON.stringify(to_add_ex));
+            if (state.data.length)
+                newEl.count = state.data[state.data.length - 1].count + 1;
+            state.data.push(newEl);
+            return { 
+                ...state,
                 data: state.data
             };
         case 'EX_DEL':

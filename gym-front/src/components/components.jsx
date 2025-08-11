@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 
-const Button = ({ onClick, type = 'button', children }) => (
-    <button type={type} onClick={onClick}>
+const Button = ({ onClick, type = 'button', children, disabled, style }) => (
+    <button style={style} type={type} onClick={onClick} disabled={disabled}>
       {children}
     </button>
 );
@@ -21,7 +21,7 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
     
     return (
         <>
-            <label htmlFor={id}>{children}</label>
+            <label htmlFor={id} className={cls}>{children}</label>
             &nbsp;
             <input ref={inputRef} value={value} className={cls} id={id} 
                 type={type} defaultValue={defaultValue} 
@@ -31,15 +31,16 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
 };
 
 
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => {
+const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit, lbl, cls, br=false }) => {
     return (
         <form onSubmit={onSearchSubmit}>
             <InputWithLabel id="search" value={searchTerm} 
-                isFocused onInputChange={onSearchInput}>
-                <strong>Search:</strong>
+                isFocused onInputChange={onSearchInput} cls={cls}>
+                {lbl}
             </InputWithLabel>
+            {br && <br/>}
             <button type="submit" disabled={!searchTerm}>
-                Submit
+                Поиск
             </button>
         </form>
     );
