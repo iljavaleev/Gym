@@ -11,7 +11,7 @@ def test_login(client, session):
     
     response = client.post("/api/v1/login", data={
         "username":"user@user.com", "password":password})
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json()["token_type"] == "bearer"
     assert len([response.json()["access_token"]])
 

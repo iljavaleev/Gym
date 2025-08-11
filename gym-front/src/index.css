@@ -1,0 +1,23 @@
+*,
+::before,
+::after 
+{
+    box-sizing: border-box;
+}
+
+:root 
+{
+    --gap-size: 1.5rem;
+}
+
+body 
+{
+    margin: unset;
+    background-color: #096e4cae;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+.stack > * + * 
+{
+    margin-block-start: 1.5em;
+}

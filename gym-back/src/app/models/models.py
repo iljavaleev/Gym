@@ -1,5 +1,5 @@
 import datetime
-from typing import Annotated
+from typing import Annotated, Optional
 from pydantic import BaseModel
 
 
@@ -32,8 +32,8 @@ class UserInDB(User):
 
 
 class UserExercise(BaseModel):
-    id: int | None = None 
-    exercise: str
+    id: int | None = None
+    title: str | None = None
 
 
 class UserLoad(BaseModel):
@@ -43,7 +43,8 @@ class UserLoad(BaseModel):
 
 
 class UserWorkout(BaseModel):
-    exercise: UserExercise
+    count: int | None = None
+    exercise: UserExercise | None
     load: list[UserLoad]
 
 

@@ -1,8 +1,8 @@
 import { VALIDATION } from "./validation";
 import axios from "axios";
 
-const getInitialQuery = () => 
-    `http://localhost:8000/api/v1/user-next-training?date=${Date.now()}`
+const getInitialQueryUrl = () => 
+    `http://localhost:8000/api/v1/user-next-training`
 
 
 const formatGetDelTrainigUrl = (date) => 
@@ -46,16 +46,25 @@ const validateField = (field, obj) => {
 }
 
 
-const dataHasErrors = (form) => 
+const validateExField = (obj, lst) => {
+    const validation = VALIDATION.exercise;
+    if (!validation.isValid(obj, lst))
+        return validation.message;
+    
+    return null;
+}
+
+
+const dataHasErrors = (form, lst) => 
 {
     if (!form)
         return true;
-    console.log(form);
+    
     for (let i=0; i < form.length; i++)
     {
         let message = null;
         
-        if (message=validateField("exercise", form[i].exercise)) 
+        if (message=validateExField(form[i].exercise, lst=lst)) 
         {  
             form[i].error = message;
             return true;
@@ -88,4 +97,4 @@ const dataHasErrors = (form) =>
 
 
 export { delTrainingByDate, postTrainingByDate, getTrainingByDate, 
-    getInitialQuery, dataHasErrors, formatGetDelTrainigUrl }
+    getInitialQueryUrl, dataHasErrors, formatGetDelTrainigUrl }
