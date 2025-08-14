@@ -1,5 +1,5 @@
 
-const AuthField = ({ id, value, onChange,children, type="text" }) => {
+const AuthField = ({ id, value, onChange, children, type="text" }) => {
     return (
         <div>
             <label htmlFor={id}>{children}</label>

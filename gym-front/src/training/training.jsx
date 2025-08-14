@@ -10,9 +10,9 @@ import { getTrainingByDate,
     formatGetDelTrainigUrl, 
     getInitialQueryUrl
 } from './utils'; 
-import { useNavigate } from "react-router";
 import { UserDataContext } from "../app/appContext";
 import { trainingData } from './data';
+import styled from 'styled-components';
 
 // {
 //   "date": "2025-07-16T15:54:56.070Z",
@@ -34,9 +34,49 @@ import { trainingData } from './data';
 //   ]
 // }
 
+const StyledContainer = styled.div`
+    display: flex;
+    gap: var(--gap-size);
+    flex-direction: column;
+    
+    .dateForm
+    {
+        flex: 1;
+    }
+
+    .trainingForm
+    {   
+        flex: 1;
+        .input
+        {
+            width: 4rem;
+            padding: 0.5em;
+            text-align: center;
+        }
+        
+        .title
+        {
+            width: 12rem;
+            padding: 0.5em;
+            text-align: center;
+        }
+        
+        .form-button
+        {
+            padding: 1em;
+        }
+    }
+
+    .trainingAction
+    {   
+        flex: 1;
+    }
+
+`;
+
 
 const Training = () => {
-    const navigate = useNavigate();
+    
     const [ cookies ] = useCookies();
     const [ trainingDate, setTrainigDate ] = useState({ date: "", time:"", 
         isDateError: false });
@@ -209,38 +249,42 @@ const Training = () => {
     }
 
     return (
-        <>
-            <DateTimeForm 
-                searchTerm={trainingDate} 
-                onSubmit={handleGetSubmit}
-                onChangeDate={handleChangeDate}
-                onChangeTime={handleChangeTime}
-            />
-
-            {trainingDate.isDateError && <p>Неправильно указана дата</p>}
-            {trainingForm.isError && <p>Что-то пошло не так...</p>}
-            {trainingForm.isCruError && <p>Ошибка. Данные не сохранены</p> }
-            {trainingForm.isLoading ? ( <p>Загружаем данные...</p> ) : 
-                ( 
-                    <TrainingFormList 
-                        list={trainingForm.data} 
-                        onSubmit={handleUpdateSubmit}
-                        addSet={addSet}
-                        delSet={delSet}
-                        addEx={handleExAdd}
-                        delEx={handleExDel}
-                        changed={changed}
-                    /> 
-                )
-            }
-            {successState.isCruSuccess && <p>Тренировка успешно сохранена</p>}
-            {successState.isDeleteSuccess && <p>Тренировка успешно удалена</p>}
-            <hr/>
-            {Boolean(trainingForm.data.length) && 
-                <Button onClick={handleDelTraining}>Удалить тренировку</Button>}
+        <StyledContainer>
+            <div className="dateForm area">
+                <DateTimeForm 
+                    searchTerm={trainingDate} 
+                    onSubmit={handleGetSubmit}
+                    onChangeDate={handleChangeDate}
+                    onChangeTime={handleChangeTime}
+                />
+            </div>
+            <div className="trainingForm area">
+                {trainingDate.isDateError && <p>Неправильно указана дата</p>}
+                {trainingForm.isError && <p>Что-то пошло не так...</p>}
+                {trainingForm.isCruError && <p>Ошибка. Данные не сохранены</p> }
+                {trainingForm.isLoading ? ( <p>Загружаем данные...</p> ) : 
+                    ( 
+                        <TrainingFormList 
+                            list={trainingForm.data} 
+                            addSet={addSet}
+                            delSet={delSet}
+                            addEx={handleExAdd}
+                            delEx={handleExDel}
+                            changed={changed}
+                        /> 
+                    )
+                }
+                {successState.isCruSuccess && <p>Тренировка успешно сохранена</p>}
+                {successState.isDeleteSuccess && <p>Тренировка успешно удалена</p>}
+            </div>
             
-            <Button onClick={()=>{navigate("/my-training/exercise")}}>Создать свое упражнение</Button>
-        </>
+            {Boolean(trainingForm.data.length) && 
+                <div className="trainingAction area stack"> 
+                <Button onClick={handleUpdateSubmit}>Создать тренировку/Сохранить Изменения</Button>
+                <Button onClick={handleDelTraining}>Удалить тренировку</Button>
+                </div>
+            }
+        </StyledContainer>
     ); 
 };
 

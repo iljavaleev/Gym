@@ -8,16 +8,11 @@ import styled from 'styled-components';
 const StyledGenContainer = styled.div`
     display: flex;
     gap: var(--gap-size);
-
-    .program
-    {   
-        border-radius: 15px;
-        background-color: #fff;
-        padding: 1.5em;
-    }
-
+    flex-direction: column;
+    
     .program-choice
     {
+        font-weight: bold;
         flex: 1;
     }
 
@@ -25,18 +20,33 @@ const StyledGenContainer = styled.div`
     {   
         flex: 1;
     }
+`;
 
-    .program-search-label
+const StyledSearchForm = styled.div`
+    input
     {
-        font-family: Georgia, serif;
-    }
-
-    button
-    {
-        border-radius: 5px;
+        width: 5rem;
+        padding: 0.5em;
+        text-align: center;
     }
 `;
 
+
+const StyledButton = styled.div`
+    button
+    {
+        background-color: #fdfdfdec;
+        color: black;
+        padding: 0.8em 1.2em;
+        border: none;
+        border-radius: 10px; 
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+        transform: translateY(-2px); /* Slight lift on hover */
+    }
+`;
 
 const formatUrl = (book, number) =>  
     `http://localhost:8000/api/v1/search?book=${book}&number=${number}`;
@@ -121,23 +131,27 @@ const Generic = () => {
     const handleSearch = (event) => { setSearchNumberTerm(event.target.value); };
     return (
         <StyledGenContainer>
-            <div className="program-choice program">
+            <div className="program-choice area">
                 <div>
                     <span className="program-search-label">Выберите программу:</span><br/>
                     &nbsp;
-                    <Button  style={{ backgroundColor: !bookTerm ? "green" : "white"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>
-                    <Button  style={{ backgroundColor: bookTerm ? "green" : "white"}} onClick={() => setBookTerm(1)} >Похудайка</Button>
+                    <StyledButton>
+                        <Button  style={{ backgroundColor: !bookTerm ? "#578f6db4" : "#fffefef8"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>
+                        <Button  style={{ backgroundColor: bookTerm ? "#578f6dbb" : "#fffefef8"}} onClick={() => setBookTerm(1)} >Похудайка</Button>
+                    </StyledButton>
                 </div>
-                <div>
+        
+                <StyledSearchForm>
                     <SearchForm searchTerm={searchNumberTerm} 
                                 onSearchSubmit={handleSearchSubmit} 
                                 onSearchInput={handleSearch}
                                 lbl="Введите номер тренировки:"
                                 cls="program-search-label"
                                 br={true}/>
-                </div>
+                </StyledSearchForm>
+                
             </div>
-            <div className="program-search program">
+            <div className="program-search area">
                 {stories.isError && <p>Something went wrong ...</p>}
                 {stories.isLoading ? ( <p>Loading ...</p> ) : 
                     ( <List list={stories.data} /> )}

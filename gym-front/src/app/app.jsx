@@ -21,9 +21,12 @@ const StyledContainer = styled.div`
 
 const StyledNav = styled.ul`
   display: flex;
-  gap: var(--gap-size);
+  flex-wrap: wrap;
+  justify-content: center;
+  
+  gap: 0.5em;
   padding: 0.5rem;
-  background-color: #d1ef0dff;
+  background-color: #b3e778c9;
   border-radius: 15px;
   
   li {
@@ -32,17 +35,59 @@ const StyledNav = styled.ul`
 
   li > a {
     display: block;
-    background-color: #0c0b0bff;
+    background-color: #578f6dff;
     color: white;
     padding: 0.5em 1em;
     text-decoration: none;
-    border-radius: 15px;
+    border-radius: 20px;
+    flex: 1;
+    color: #f0eeeeff;
   };
-
-  .nav-right {
-    margin-inline-start: auto;
-  }
 `;
+
+
+const StyledChiled = styled.div`
+    .area
+    {   
+        border-radius: 20px;
+        background-color: #b3e77891;
+        padding: 1.5em;
+    }
+
+    input
+    {
+        border: 1px solid #b3e77891;
+        border-radius: 10px;
+        color: #333;
+        background-color: #f1ebebec;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+    input:focus 
+    {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    button
+    {
+        background-color: #f1ebebec;
+        color: black;
+        padding: 0.8em 1.2em;
+        border: none;
+        border-radius: 10px; 
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+    }
+`;
+
+
+
 
 
 const ProtectedRoute = ({ children }) => {
@@ -57,8 +102,6 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
-// const navigate = useNavigate();
-// navigate("/users");
 
 const App = () => {
   const [ cookies, updateCookies ] = useCookies();
@@ -134,9 +177,9 @@ const Layout = ( {token, onLogout} ) => {
           {token && <li><NavLink className="nav-right" to="/"onClick={onLogout}>Выйти</NavLink></li>}           
         </StyledNav>
       </nav>
-      <main>
+      <StyledChiled>
         <Outlet />
-      </main>
+      </StyledChiled>
      </StyledContainer>
   );
 };

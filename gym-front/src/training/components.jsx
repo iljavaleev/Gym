@@ -2,6 +2,7 @@ import { InputWithLabel, Button } from "../components/components";
 import { trainingData } from "../training/data";
 import { useState, useContext, useRef } from "react";
 import { UserDataContext } from "../app/appContext";
+import { useNavigate } from "react-router";
 
 const LABELS = [ "повторения", "ожидаемый результат", "фактический" ];
 
@@ -22,7 +23,8 @@ const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
 }
 
 
-const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet, changed }) => {
+const TrainingFormList = ({ list, addEx, delEx, addSet, delSet, changed }) => {
+    const navigate = useNavigate();
     if (list)
     {
         list.sort((a, b) => { return a.count - b.count; });
@@ -30,8 +32,8 @@ const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet, change
     
     return (
         <>
-            <form onSubmit={onSubmit}>
-                <ul>
+            <form>
+                <ul className="stack">
                     {list.map((item, idx) => (
                         <FormItem 
                             key={crypto.randomUUID()} 
@@ -43,10 +45,11 @@ const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet, change
                         />
                     ))}
                 </ul>
-                <Button onClick={addEx}>Добавить Упражнение</Button>
-                <Button onClick={delEx}>Удалить Упражнение</Button>
-                <br/>
-                <Button type="submit">Сохранить тренировку</Button>
+                <div className="stack form-button">
+                    <Button onClick={addEx}>Добавить Упражнение</Button>
+                    <Button onClick={delEx}>Удалить Упражнение</Button>
+                    <Button onClick={()=>{navigate("/my-training/exercise")}}>Создать свое упражнение</Button>
+                </div>
             </form>
         </>
     );
@@ -144,7 +147,7 @@ const ObjectToForm = ({obj, removeError, changed }) => {
         <>
             {Object.entries(obj).map(([k, v]) => 
             (    
-                <input key={crypto.randomUUID()} className={k} type="text" 
+                <input key={crypto.randomUUID()} className={`${k} input`} type="text" 
                     placeholder={LABELS[count++]} defaultValue={v} 
                     onChange={onChange} onMouseEnter={()=>removeError()}
                 />    

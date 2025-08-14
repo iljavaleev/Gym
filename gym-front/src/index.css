@@ -13,8 +13,8 @@
 body 
 {
     margin: unset;
-    background-color: #096e4cae;
-    font-family: Helvetica, Arial, sans-serif;
+    background-color: #dfd4d6ae;
+    font-family: Georgia, serif;
 }
 
 .stack > * + * 
