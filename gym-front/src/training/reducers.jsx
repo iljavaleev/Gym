@@ -36,11 +36,15 @@ const trainingReducer = (state, action) => {
             };
         case 'EX_DEL':
             if (state.data.length > 0)
+            {
                 state.data.pop();
+            }
             return { ...state };
         case 'SET_DEL':
             if (state.data[action.idx].load.length > 0)
+            {
                 state.data[action.idx].load.pop();
+            }
             return { ...state };
         case 'SET_ADD':
             state.data[action.idx].load.push(JSON.parse(JSON.stringify(to_add_set)));

@@ -3,10 +3,12 @@
 ::after 
 {
     box-sizing: border-box;
+    font-size: 16px;
 }
 
 :root 
 {
+   
     --gap-size: 1.5rem;
 }
 
@@ -20,4 +22,13 @@ body
 .stack > * + * 
 {
     margin-block-start: 1.5em;
+}
+
+#training-date, #training-time 
+{
+    border: 1px solid #ccc;
+    padding: 8px;
+    color: #333;
+    text-align: center;
+    min-width: 10em;
 }

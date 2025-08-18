@@ -7,7 +7,7 @@ import { Training } from '../training/training'
 import { Exercise } from '../exercise/exercise';
 import { Routes, Route, Outlet, NavLink, useLocation, Navigate} from 'react-router';
 import { useCookies } from "react-cookie";
-import { useRef, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getUserExs } from '../exercise/utils';
 import './App.css'
 
@@ -34,14 +34,16 @@ const StyledNav = styled.ul`
   }
 
   li > a {
+    flex: 1;
+
     display: block;
     background-color: #578f6dff;
     color: white;
     padding: 0.5em 1em;
     text-decoration: none;
     border-radius: 20px;
-    flex: 1;
     color: #f0eeeeff;
+    font-size: 18px;
   };
 `;
 

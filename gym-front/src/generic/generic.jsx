@@ -8,17 +8,31 @@ import styled from 'styled-components';
 const StyledGenContainer = styled.div`
     display: flex;
     gap: var(--gap-size);
-    flex-direction: column;
+    flex-wrap: wrap;
+
     
     .program-choice
     {
-        font-weight: bold;
         flex: 1;
+        
+        display: flex;
+        gap: 1em;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+
+
     }
 
     .program-search
     {   
         flex: 1;
+    }
+
+    .program-search-label
+    {
+        font-size: 1.2em;
     }
 `;
 
@@ -37,7 +51,7 @@ const StyledButton = styled.div`
     {
         background-color: #fdfdfdec;
         color: black;
-        padding: 0.8em 1.2em;
+        padding: 0.6em 0.8em;
         border: none;
         border-radius: 10px; 
         cursor: pointer;

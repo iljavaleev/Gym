@@ -42,21 +42,52 @@ const StyledContainer = styled.div`
     .dateForm
     {
         flex: 1;
+        
+        .date-form-cintainer
+        {
+            display: flex;
+            gap: var(--gap-size);
+            flex-direction: row;
+            justify-content: center;
+            align-items: start;
+        }
+
+        #date-time-part
+        {
+            display: flex;
+            flex-wrap:wrap;
+            justify-content: center;
+        }
+        
     }
 
     .trainingForm
     {   
         flex: 1;
-        .input
+        .exs-list
         {
-            width: 4rem;
+            display: flex;
+            gap: var(--gap-size);
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: center;
+            >div
+            {
+                margin-block-start: 0;
+            }
+        }
+
+        .input > input
+        {
+            width: 6rem;
             padding: 0.5em;
             text-align: center;
         }
         
         .title
         {
-            width: 12rem;
+            width: 18rem;
             padding: 0.5em;
             text-align: center;
         }
@@ -64,12 +95,36 @@ const StyledContainer = styled.div`
         .form-button
         {
             padding: 1em;
+            display: flex;
+            gap: 0.3em;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            
+            >button
+            {
+                min-width: 16em;
+            }
         }
+
     }
 
     .trainingAction
     {   
         flex: 1;
+        display: flex;
+        gap: 0.3em;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: center;
+        justify-content: center;
+        align-items: start;
+        >button
+        {
+            margin-block-start: 0;
+            width: 16em;
+            
+        }
     }
 
 `;
@@ -280,7 +335,7 @@ const Training = () => {
             
             {Boolean(trainingForm.data.length) && 
                 <div className="trainingAction area stack"> 
-                <Button onClick={handleUpdateSubmit}>Создать тренировку/Сохранить Изменения</Button>
+                <Button onClick={handleUpdateSubmit}>Создать тренировку Сохранить Изменения</Button>
                 <Button onClick={handleDelTraining}>Удалить тренировку</Button>
                 </div>
             }
