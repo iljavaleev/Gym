@@ -8,14 +8,21 @@
 
 :root 
 {
-   
     --gap-size: 1.5rem;
+}
+
+@media screen and (max-width: 768px) 
+{
+    body
+    {
+        padding-bottom: 140px;
+    }
 }
 
 body 
 {
     margin: unset;
-    background-color: #dfd4d6ae;
+    background-color: #ece4e5ae;
     font-family: Georgia, serif;
 }
 
@@ -31,4 +38,9 @@ body
     color: #333;
     text-align: center;
     min-width: 10em;
+}
+
+.in-label
+{
+    font-size: 1.2em;
 }

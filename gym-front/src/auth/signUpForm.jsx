@@ -12,13 +12,18 @@ const StyledForm = styled.form`
     display: flex;
     gap: var(--gap-size);
     flex-direction: column;
-    align-self: center;
-    max-width: 30%;
-
-    .toRegister
+    flex-wrap: wrap;
+    align-items: start;
+    
+    .to-register
     {
        
         font-size: 0.8em;
+    }
+    
+    button
+    {
+        background-color: #eaf133c9;
     }
     
 `;
@@ -75,7 +80,7 @@ const SignUpForm = () => {
     
     return (
         <div className="area">
-            <h2>Регистрация</h2>
+            <h2 className="in-label">Регистрация</h2>
             <StyledForm onSubmit={handleSubmit} >
                 <AuthField 
                     id={"email"} 

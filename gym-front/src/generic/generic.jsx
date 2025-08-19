@@ -9,8 +9,10 @@ const StyledGenContainer = styled.div`
     display: flex;
     gap: var(--gap-size);
     flex-wrap: wrap;
-
+    justify-content: space-around;
+    align-items: center;
     
+
     .program-choice
     {
         flex: 1;
@@ -28,6 +30,10 @@ const StyledGenContainer = styled.div`
     .program-search
     {   
         flex: 1;
+        @media screen and (max-width: 768px) 
+        {
+            flex: 1 100%;
+        }
     }
 
     .program-search-label
@@ -39,17 +45,19 @@ const StyledGenContainer = styled.div`
 const StyledSearchForm = styled.div`
     input
     {
-        width: 5rem;
-        padding: 0.5em;
+        width: 4rem;
+        padding: 0.4em;
         text-align: center;
     }
+    button
+    {
+        background-color: #eaf133c9;
+    }
 `;
-
 
 const StyledButton = styled.div`
     button
     {
-        background-color: #fdfdfdec;
         color: black;
         padding: 0.6em 0.8em;
         border: none;
@@ -95,7 +103,6 @@ const getTrainingByNumber = async (url) => {
         }
     );
 }
-
 
 const Generic = () => {
     const [searchNumberTerm, setSearchNumberTerm] = useStorageState("search", "1");
@@ -147,7 +154,7 @@ const Generic = () => {
         <StyledGenContainer>
             <div className="program-choice area">
                 <div>
-                    <span className="program-search-label">Выберите программу:</span><br/>
+                    <span className="program-search-label">Выберите программу</span><br/>
                     &nbsp;
                     <StyledButton>
                         <Button  style={{ backgroundColor: !bookTerm ? "#578f6db4" : "#fffefef8"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>

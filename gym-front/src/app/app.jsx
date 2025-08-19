@@ -15,36 +15,51 @@ import { UserDataContext } from './appContext';
 import styled from 'styled-components';
 
 const StyledContainer = styled.div`
-  max-inline-size: 1080px;
-  margin-inline: auto;
+    max-inline-size: 1080px;
+    margin-inline: auto;
 `;
 
 const StyledNav = styled.ul`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  
-  gap: 0.5em;
-  padding: 0.5rem;
-  background-color: #b3e778c9;
-  border-radius: 15px;
-  
-  li {
-    list-style-type: none;
-  }
+    @media screen and (max-width: 768px) 
+    {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); 
+      z-index: 1000; 
+    }
 
-  li > a {
-    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 
-    display: block;
-    background-color: #578f6dff;
-    color: white;
-    padding: 0.5em 1em;
-    text-decoration: none;
-    border-radius: 20px;
-    color: #f0eeeeff;
-    font-size: 18px;
-  };
+    gap: 0.5em;
+    padding: 0.5rem;
+    background-color: #b3e778c9;
+    border-radius: 15px;
+
+    li 
+    {
+      list-style-type: none;
+    }
+
+    li > a 
+    {
+      flex: 1;
+
+      display: block;
+      background-color: #578f6dff;
+      color: white;
+      padding: 0.5em 1em;
+      text-decoration: none;
+      border-radius: 20px;
+      color: #f0eeeeff;
+      font-size: 18px;
+    };
+
 `;
 
 
@@ -171,7 +186,7 @@ const Layout = ( {token, onLogout} ) => {
   return (
      <StyledContainer>
       <nav>
-        <StyledNav>
+        <StyledNav className="mobile-footer">
           <li><NavLink to="/" >Программа тренировок</NavLink></li>
           <li><NavLink to="/my-training" >Мои тренировки</NavLink></li>
           {!token && <li><NavLink className="nav-right" to="/login" >Вход</NavLink></li>}

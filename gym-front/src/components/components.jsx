@@ -34,12 +34,12 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
 const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit, lbl, cls, br=false }) => {
     return (
         <form onSubmit={onSearchSubmit}>
-            <InputWithLabel id="search" value={searchTerm} 
+            <InputWithLabel className="search" value={searchTerm} 
                 isFocused onInputChange={onSearchInput} cls={cls}>
                 {lbl}
             </InputWithLabel>
             {br && <br/>}
-            <button type="submit" disabled={!searchTerm}>
+            <button type="submit" className="submit-button" disabled={!searchTerm}>
                 Поиск
             </button>
         </form>

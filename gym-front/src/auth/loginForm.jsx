@@ -12,13 +12,16 @@ const StyledForm = styled.form`
     display: flex;
     gap: var(--gap-size);
     flex-direction: column;
-    align-self: center;
-    max-width: 30%;
-
-    .toRegister
+    flex-wrap: wrap;
+    align-items: start;
+    .to-register
     {
        
         font-size: 0.8em;
+    }
+    button
+    {
+        background-color: #eaf133c9;
     }
     
 `;
@@ -74,7 +77,7 @@ const LoginForm = () => {
     }
     return (
         <div className="area">
-            <h2>Авторизация</h2>
+            <h2 className="in-label">Авторизация</h2>
             <StyledForm onSubmit={handleSubmit}>
                 <AuthField 
                     id={"email"} 
@@ -98,7 +101,7 @@ const LoginForm = () => {
                 </span>):null}  
             <button type="submit" disabled={hasChanges}>Войти</button>
             
-            <div className="toRegister">Еще нет аккаунта?<Link to="/register" replace state={{from: location}}> Зарегестрируйтесь</Link></div>
+            <div className="to-register">Еще нет аккаунта?<Link to="/register" replace state={{from: location}}> Зарегестрируйтесь</Link></div>
             </StyledForm>
             {error.submit_error}
         </div>

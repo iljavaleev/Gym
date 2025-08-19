@@ -52,8 +52,8 @@ const TrainingFormList = ({ list, addEx, delEx, addSet, delSet, changed }) => {
                     ))}
                 </div>
                 <div className="form-button">
-                    <Button onClick={addEx}>Добавить Упражнение</Button>
-                    <Button onClick={delEx}>Удалить Упражнение</Button>
+                    <Button  onClick={addEx}>Добавить Упражнение</Button>
+                    <Button  onClick={delEx}>Удалить Упражнение</Button>
                     <Button onClick={()=>{navigate("/my-training/exercise")}}>Создать свое упражнение</Button>
                 </div>
             </form>
@@ -84,8 +84,8 @@ const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
 
             {showError && <p>{item.error}</p>}
 
-            <Button onClick={() => { addSet(exNum); removeError(); }}>+</Button>
-            <Button onClick={() => { delSet(exNum); removeError(); }}>-</Button>
+            <Button id="set-button-" onClick={() => { addSet(exNum); removeError(); }}>+</Button>
+            <Button id="set-button+" onClick={() => { delSet(exNum); removeError(); }}>-</Button>
         </div>
     );
 };

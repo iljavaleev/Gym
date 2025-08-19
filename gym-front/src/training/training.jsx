@@ -39,6 +39,12 @@ const StyledContainer = styled.div`
     gap: var(--gap-size);
     flex-direction: column;
     
+    button
+    {
+        background-color: #ebf133a0;
+    }
+    
+
     .dateForm
     {
         flex: 1;
