@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 
-const Button = ({ onClick, type = 'button', children, disabled, style }) => (
-    <button style={style} type={type} onClick={onClick} disabled={disabled}>
+const Button = ({ cls, onClick, type = 'button', children, disabled, style }) => (
+    <button className={cls} style={style} type={type} onClick={onClick} disabled={disabled}>
       {children}
     </button>
 );
@@ -20,13 +20,13 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
 
     
     return (
-        <>
-            <label htmlFor={id} className={cls}>{children}</label>
+        <div  className={cls}>
+            <label htmlFor={id}>{children}</label>
             &nbsp;
-            <input ref={inputRef} value={value} className={cls} id={id} 
+            <input ref={inputRef} value={value} id={id} 
                 type={type} defaultValue={defaultValue} 
                 onChange={onInputChange} placeholder={help} onClick={onClick}/>
-        </>
+        </div>
     );
 };
 

@@ -39,30 +39,35 @@ const StyledContainer = styled.div`
     gap: var(--gap-size);
     flex-direction: column;
     
-    button
-    {
-        background-color: #ebf133a0;
-    }
-    
-
     .dateForm
     {
         flex: 1;
         
-        .date-form-cintainer
+        .date-form-container
         {
             display: flex;
             gap: var(--gap-size);
             flex-direction: row;
             justify-content: center;
             align-items: start;
+            
+            button
+            {
+                background-color: #c1e15af4;
+            }
         }
 
         #date-time-part
         {
             display: flex;
             flex-wrap:wrap;
+            gap: 0.2em;
             justify-content: center;
+            
+            @media screen and (max-width: 768px) 
+            {
+                width: 10em;
+            }
         }
         
     }
@@ -110,12 +115,15 @@ const StyledContainer = styled.div`
             >button
             {
                 min-width: 16em;
+                background-color:  #c1e15af4;
             }
+            
+            
         }
 
     }
 
-    .trainingAction
+    .training-action
     {   
         flex: 1;
         display: flex;
@@ -123,16 +131,43 @@ const StyledContainer = styled.div`
         flex-direction: row;
         flex-wrap: wrap;
         align-content: center;
-        justify-content: center;
-        align-items: start;
-        >button
+        
+        
+        
+        >span
         {
             margin-block-start: 0;
-            width: 16em;
+            width: 16em;   
+        }
+        
+        .complete-button > button
+        {
+            background-color: #6ab479fe;
+        }
+        
+        .delete-button > button
+        {
+            background-color: #e14461bf;
+        }
+
+
             
+        @media screen and (max-width: 768px) 
+        {   
+            button
+            {
+                width: 16em;
+            } 
         }
     }
 
+    .exercise
+    {
+        button
+        {
+            background-color: #b4c5abae;
+        }
+    }
 `;
 
 
@@ -340,9 +375,9 @@ const Training = () => {
             </div>
             
             {Boolean(trainingForm.data.length) && 
-                <div className="trainingAction area stack"> 
-                <Button onClick={handleUpdateSubmit}>Создать тренировку Сохранить Изменения</Button>
-                <Button onClick={handleDelTraining}>Удалить тренировку</Button>
+                <div className="training-action area stack"> 
+                    <span className="complete-button"><Button onClick={handleUpdateSubmit}>Создать тренировку Сохранить Изменения</Button></span>
+                    <span className="delete-button"><Button  onClick={handleDelTraining}>Удалить тренировку</Button></span>
                 </div>
             }
         </StyledContainer>

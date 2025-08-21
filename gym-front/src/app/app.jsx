@@ -40,7 +40,8 @@ const StyledNav = styled.ul`
     padding: 0.5rem;
     background-color: #b3e778c9;
     border-radius: 15px;
-
+    border: 3px solid #80bd3b91;
+    
     li 
     {
       list-style-type: none;
@@ -69,6 +70,8 @@ const StyledChiled = styled.div`
         border-radius: 20px;
         background-color: #b3e77891;
         padding: 1.5em;
+        border: 3px solid #80bd3b91;
+       
     }
 
     input
@@ -102,9 +105,6 @@ const StyledChiled = styled.div`
         transform: translateY(-2px);
     }
 `;
-
-
-
 
 
 const ProtectedRoute = ({ children }) => {
@@ -148,7 +148,6 @@ const App = () => {
   }, [cookies]);
   
   return (
-   
       <Routes>
         <Route element={<Layout token={cookies.access_token} onLogout={handleLogout}/>}>
           <Route index element={<Generic />} />
@@ -164,7 +163,6 @@ const App = () => {
           <Route path="*" element={<NoMatch />} />
         </Route>
       </Routes>
-   
   )
 }
 

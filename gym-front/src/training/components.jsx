@@ -9,7 +9,7 @@ const LABELS = [ "повторения", "ожидаемый результат"
 
 const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
     return (
-        <form onSubmit={onSubmit} className="date-form-cintainer">
+        <form onSubmit={onSubmit} className="date-form-container">
             <div id="date-time-part">
                 <button type="submit" name="by_date">Найти тренировку по дате</button>
                 <br/> 
@@ -84,8 +84,8 @@ const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
 
             {showError && <p>{item.error}</p>}
 
-            <Button id="set-button-" onClick={() => { addSet(exNum); removeError(); }}>+</Button>
-            <Button id="set-button+" onClick={() => { delSet(exNum); removeError(); }}>-</Button>
+            <Button className="button-" onClick={() => { addSet(exNum); removeError(); }}>+</Button>
+            <Button className="button+" onClick={() => { delSet(exNum); removeError(); }}>-</Button>
         </div>
     );
 };

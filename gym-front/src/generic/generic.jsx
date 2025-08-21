@@ -49,9 +49,9 @@ const StyledSearchForm = styled.div`
         padding: 0.4em;
         text-align: center;
     }
-    button
+    .submit-button
     {
-        background-color: #eaf133c9;
+        background-color:  #c1e15af4;
     }
 `;
 
