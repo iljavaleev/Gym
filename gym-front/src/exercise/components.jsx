@@ -71,16 +71,17 @@ const AddUserEx = ({ onDataChange }) => {
 
     return (
         <>
-            <Button onClick={handleClickOpen}>{add ? "Закрыть" : "Создать новое"}</Button>
+            <Button cls="create-close" onClick={handleClickOpen}>{add ? "-" : "+"}</Button>
             {
-                add && <div>
-                <InputWithLabel value={ex.title} onInputChange={onChange} >Введите название</InputWithLabel>
-                <Button onClick={onClick}>Отправить</Button>
-                { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
-                { ex.isSuccess && <strong>SUCCESS</strong> }
+                add && <div className="exs-container">
+                    <div>Вы можете создать не более 20 своих упражнений</div>
+                    <InputWithLabel cls="custom-title" value={ex.title} onInputChange={onChange} help="введите название"/>
+                    <Button cls="comlete-button" onClick={onClick}>Создать</Button>
+                    { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
+                    { ex.isSuccess && <><br/><strong>Успешно</strong></> }
                 </div>
             }
-            <Button onClick={handleToTraining}>Обратно к тренировке</Button>
+            <Button cls="comlete-button" onClick={handleToTraining}>Обратно к тренировке</Button>
         </>
     );
 }

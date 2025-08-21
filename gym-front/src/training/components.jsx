@@ -2,27 +2,35 @@ import { InputWithLabel, Button } from "../components/components";
 import { trainingData } from "../training/data";
 import { useState, useContext, useRef } from "react";
 import { UserDataContext } from "../app/appContext";
+import { useNavigate } from "react-router";
 
 const LABELS = [ "повторения", "ожидаемый результат", "фактический" ];
 
 
 const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
     return (
-        <form onSubmit={onSubmit}>
-            <InputWithLabel id="training-date" value={searchTerm.date} 
-                onInputChange={onChangeDate} type="date" isFocused>
-            </InputWithLabel>
-            <InputWithLabel id="training-time" value={searchTerm.time} 
-                onInputChange={onChangeTime} type="time" step="1" isFocused>
-            </InputWithLabel>
-            <button type="submit" name="by_date">Найти по дате</button>
-            <button type="submit" name="next">Ближайшая тренировка</button>
+        <form onSubmit={onSubmit} className="date-form-container">
+            <div id="date-time-part">
+                <button type="submit" name="by_date">Найти тренировку по дате</button>
+                <br/> 
+                <InputWithLabel id="training-date" 
+                    value={searchTerm.date} onInputChange={onChangeDate} 
+                    type="date" isFocused>
+                </InputWithLabel>
+                <InputWithLabel id="training-time" 
+                    value={searchTerm.time} onInputChange={onChangeTime} 
+                    type="time" step="1" isFocused>
+                </InputWithLabel>
+            </div>
+            <br/> 
+            <button type="submit" name="next">Найти ближайшую тренировку</button>
         </form> 
     );
 }
 
 
-const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet, changed }) => {
+const TrainingFormList = ({ list, addEx, delEx, addSet, delSet, changed }) => {
+    const navigate = useNavigate();
     if (list)
     {
         list.sort((a, b) => { return a.count - b.count; });
@@ -30,8 +38,8 @@ const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet, change
     
     return (
         <>
-            <form onSubmit={onSubmit}>
-                <ul>
+            <form>
+                <div className="exs-list stack">
                     {list.map((item, idx) => (
                         <FormItem 
                             key={crypto.randomUUID()} 
@@ -42,11 +50,12 @@ const TrainingFormList = ({ list, onSubmit, addEx, delEx, addSet, delSet, change
                             changed={changed}
                         />
                     ))}
-                </ul>
-                <Button onClick={addEx}>Добавить Упражнение</Button>
-                <Button onClick={delEx}>Удалить Упражнение</Button>
-                <br/>
-                <Button type="submit">Сохранить тренировку</Button>
+                </div>
+                <div className="form-button">
+                    <Button  onClick={addEx}>Добавить Упражнение</Button>
+                    <Button  onClick={delEx}>Удалить Упражнение</Button>
+                    <Button onClick={()=>{navigate("/my-training/exercise")}}>Создать свое упражнение</Button>
+                </div>
             </form>
         </>
     );
@@ -59,7 +68,7 @@ const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
     const removeError = () => { setShowError(false); delete item.error; }; 
     
     return (
-        <li className="exercise">
+        <div className="exercise">
             <AutocompleteInput id={"title" + exNum} className="title" 
                 userData={userData} removeError={removeError} item={item} 
                 changed={changed}
@@ -75,9 +84,9 @@ const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
 
             {showError && <p>{item.error}</p>}
 
-            <Button onClick={() => { addSet(exNum); removeError(); }}>+</Button>
-            <Button onClick={() => { delSet(exNum); removeError(); }}>-</Button>
-        </li>
+            <Button className="button-" onClick={() => { addSet(exNum); removeError(); }}>+</Button>
+            <Button className="button+" onClick={() => { delSet(exNum); removeError(); }}>-</Button>
+        </div>
     );
 };
 
@@ -144,10 +153,11 @@ const ObjectToForm = ({obj, removeError, changed }) => {
         <>
             {Object.entries(obj).map(([k, v]) => 
             (    
-                <input key={crypto.randomUUID()} className={k} type="text" 
-                    placeholder={LABELS[count++]} defaultValue={v} 
-                    onChange={onChange} onMouseEnter={()=>removeError()}
-                />    
+                <span className="input" key={crypto.randomUUID()}>
+                    <input className={k} type="text" 
+                        placeholder={LABELS[count++]} defaultValue={v} 
+                        onChange={onChange} onMouseEnter={()=>removeError()}/>
+                </span>    
             ))}
         </>
     )

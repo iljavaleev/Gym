@@ -6,6 +6,25 @@ import { useLocation, Link, useNavigate } from 'react-router';
 import { useCookies } from 'react-cookie';
 
 import { submit } from './utils';
+import styled from 'styled-components';
+
+const StyledForm = styled.form`
+    display: flex;
+    gap: var(--gap-size);
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: start;
+    .to-register
+    {
+       
+        font-size: 0.8em;
+    }
+    button
+    {
+        background-color: #eaf133c9;
+    }
+    
+`;
 
 const ENDPOINT = "http://localhost:8000/api/v1/login";
 
@@ -57,14 +76,14 @@ const LoginForm = () => {
             
     }
     return (
-        <div>
-            <h2>Log in Form</h2>
-            <form onSubmit={handleSubmit}>
+        <div className="area">
+            <h2 className="in-label">Авторизация</h2>
+            <StyledForm onSubmit={handleSubmit}>
                 <AuthField 
                     id={"email"} 
                     value={form.email}  
                     onChange={handleChange}> 
-                    Адрес эл. почты
+                    Адрес эл. почты:
                 </AuthField>
                 {error?.field_error?.email ? (
                 <span style={{ color: 'red' }}>
@@ -74,15 +93,16 @@ const LoginForm = () => {
                     id={"password"} 
                     value={form.password} 
                     onChange={handleChange}>
-                    Пароль
+                    Пароль:
                 </AuthField>
                 {error?.field_error?.password ? (
                 <span style={{ color: 'red' }}>
                     {error?.field_error?.password[0]?.message}
                 </span>):null}  
             <button type="submit" disabled={hasChanges}>Войти</button>
-            <span>Еще нет аккаунта?<Link to="/register" replace state={{from: location}}>Зарегестрируйтесь</Link></span>
-            </form>
+            
+            <div className="to-register">Еще нет аккаунта?<Link to="/register" replace state={{from: location}}> Зарегестрируйтесь</Link></div>
+            </StyledForm>
             {error.submit_error}
         </div>
     );

@@ -8,35 +8,67 @@ import styled from 'styled-components';
 const StyledGenContainer = styled.div`
     display: flex;
     gap: var(--gap-size);
-
-    .program
-    {   
-        border-radius: 15px;
-        background-color: #fff;
-        padding: 1.5em;
-    }
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    
 
     .program-choice
     {
         flex: 1;
+        
+        display: flex;
+        gap: 1em;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+
+
     }
 
     .program-search
     {   
         flex: 1;
+        @media screen and (max-width: 768px) 
+        {
+            flex: 1 100%;
+        }
     }
 
     .program-search-label
     {
-        font-family: Georgia, serif;
-    }
-
-    button
-    {
-        border-radius: 5px;
+        font-size: 1.2em;
     }
 `;
 
+const StyledSearchForm = styled.div`
+    input
+    {
+        width: 4rem;
+        padding: 0.4em;
+        text-align: center;
+    }
+    .submit-button
+    {
+        background-color:  #c1e15af4;
+    }
+`;
+
+const StyledButton = styled.div`
+    button
+    {
+        color: black;
+        padding: 0.6em 0.8em;
+        border: none;
+        border-radius: 10px; 
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+        transform: translateY(-2px); /* Slight lift on hover */
+    }
+`;
 
 const formatUrl = (book, number) =>  
     `http://localhost:8000/api/v1/search?book=${book}&number=${number}`;
@@ -71,7 +103,6 @@ const getTrainingByNumber = async (url) => {
         }
     );
 }
-
 
 const Generic = () => {
     const [searchNumberTerm, setSearchNumberTerm] = useStorageState("search", "1");
@@ -121,23 +152,27 @@ const Generic = () => {
     const handleSearch = (event) => { setSearchNumberTerm(event.target.value); };
     return (
         <StyledGenContainer>
-            <div className="program-choice program">
+            <div className="program-choice area">
                 <div>
-                    <span className="program-search-label">Выберите программу:</span><br/>
+                    <span className="program-search-label">Выберите программу</span><br/>
                     &nbsp;
-                    <Button  style={{ backgroundColor: !bookTerm ? "green" : "white"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>
-                    <Button  style={{ backgroundColor: bookTerm ? "green" : "white"}} onClick={() => setBookTerm(1)} >Похудайка</Button>
+                    <StyledButton>
+                        <Button  style={{ backgroundColor: !bookTerm ? "#578f6db4" : "#fffefef8"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>
+                        <Button  style={{ backgroundColor: bookTerm ? "#578f6dbb" : "#fffefef8"}} onClick={() => setBookTerm(1)} >Похудайка</Button>
+                    </StyledButton>
                 </div>
-                <div>
+        
+                <StyledSearchForm>
                     <SearchForm searchTerm={searchNumberTerm} 
                                 onSearchSubmit={handleSearchSubmit} 
                                 onSearchInput={handleSearch}
                                 lbl="Введите номер тренировки:"
                                 cls="program-search-label"
                                 br={true}/>
-                </div>
+                </StyledSearchForm>
+                
             </div>
-            <div className="program-search program">
+            <div className="program-search area">
                 {stories.isError && <p>Something went wrong ...</p>}
                 {stories.isLoading ? ( <p>Loading ...</p> ) : 
                     ( <List list={stories.data} /> )}

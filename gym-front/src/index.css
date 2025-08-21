@@ -3,6 +3,7 @@
 ::after 
 {
     box-sizing: border-box;
+    font-size: 16px;
 }
 
 :root 
@@ -10,14 +11,39 @@
     --gap-size: 1.5rem;
 }
 
+@media screen and (max-width: 768px) 
+{
+    body
+    {
+        padding-top: 0.5em;
+        padding-bottom: 140px;
+    }
+}
+
 body 
 {
     margin: unset;
-    background-color: #096e4cae;
-    font-family: Helvetica, Arial, sans-serif;
+    background-color: #ece4e5ae;
+    font-family: Georgia, serif;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); 
 }
 
 .stack > * + * 
 {
     margin-block-start: 1.5em;
 }
+
+#training-date, #training-time 
+{
+    border: 1px solid #ccc;
+    padding: 8px;
+    color: #333;
+    text-align: center;
+    min-width: 10em;
+}
+
+.in-label
+{
+    font-size: 1.2em;
+}
+
