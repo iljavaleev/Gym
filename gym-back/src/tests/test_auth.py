@@ -4,7 +4,8 @@ from app.routers.auth import get_password_hash
 def test_login(client, session):
     password = "123"
     ul = [
-        User(email="user@user.com", hashed_password=get_password_hash(password)),
+        User(email="user@user.com", 
+             hashed_password=get_password_hash(password)),
     ]
     session.add_all(ul)
     session.commit()

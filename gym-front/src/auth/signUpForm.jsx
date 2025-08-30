@@ -5,28 +5,7 @@ import { useNavigate } from 'react-router';
 import { useCookies } from 'react-cookie';
 import { VALIDATION } from './validation';
 import { submit } from './utils';
-
-import styled from 'styled-components';
-
-const StyledForm = styled.form`
-    display: flex;
-    gap: var(--gap-size);
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: start;
-    
-    .to-register
-    {
-       
-        font-size: 0.8em;
-    }
-    
-    button
-    {
-        background-color: #eaf133c9;
-    }
-    
-`;
+import { StyledForm } from './styles';
 
 
 const ENDPOINT = "http://localhost:8000/api/v1/register";
@@ -71,7 +50,8 @@ const SignUpForm = () => {
         if (result)
         {
             const { access_token, user_id, expire } = result;
-            setCookie("access_token", access_token, {expires: new Date(expire * 1000)});            
+            setCookie("access_token", access_token, {
+                expires: new Date(expire * 1000)});            
             setCookie("user_id", user_id);
             navigate("/");
         }
@@ -83,7 +63,7 @@ const SignUpForm = () => {
             <h2 className="in-label">Регистрация</h2>
             <StyledForm onSubmit={handleSubmit} >
                 <AuthField 
-                    id={"email"} 
+                    id="email"
                     value={form.email}  
                     onChange={handleChange}> 
                     Адрес эл. почты:
@@ -93,7 +73,7 @@ const SignUpForm = () => {
                     {error?.field_error?.email[0]?.message}
                 </span>):null} 
                 <AuthField 
-                    id={"password"} 
+                    id="password"
                     value={form.password} 
                     onChange={handleChange}>
                     Пароль:
@@ -103,7 +83,7 @@ const SignUpForm = () => {
                     {error?.field_error?.password[0]?.message}
                 </span>):null}  
                 <AuthField 
-                    id={"password2"} 
+                    id="password2" 
                     value={form.password2}  
                     onChange={handleChange} >
                     Подтвердите пароль:
@@ -112,7 +92,9 @@ const SignUpForm = () => {
                 <span style={{ color: 'red' }}>
                     {error?.field_error?.password2[0]?.message}
                 </span>):null}   
-            <button type="submit" disabled={hasChanges}>Зарегестрироваться</button>
+            <button type="submit" disabled={hasChanges}>
+                Зарегестрироваться
+            </button>
             </StyledForm>
         </div>
     );

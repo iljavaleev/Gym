@@ -1,14 +1,16 @@
 import { useRef, useEffect } from "react";
 
-const Button = ({ cls, onClick, type = 'button', children, disabled, style }) => (
-    <button className={cls} style={style} type={type} onClick={onClick} disabled={disabled}>
+const Button = ({ cls, onClick, type = 'button', children, 
+    disabled, style }) => (
+    <button className={cls} style={style} type={type} onClick={onClick} 
+        disabled={disabled}>
       {children}
     </button>
 );
 
 
-const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused, 
-    children, onInputChange, onClick, help }) => {
+const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', 
+    isFocused, children, onInputChange, onClick, help }) => {
     const inputRef = useRef();
 
     useEffect(() => {
@@ -31,7 +33,8 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', isFocused
 };
 
 
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit, lbl, cls, br=false }) => {
+const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit, lbl, 
+    cls, br=false }) => {
     return (
         <form onSubmit={onSearchSubmit}>
             <InputWithLabel className="search" value={searchTerm} 
@@ -39,7 +42,8 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit, lbl, cls, br=fa
                 {lbl}
             </InputWithLabel>
             {br && <br/>}
-            <button type="submit" className="submit-button" disabled={!searchTerm}>
+            <button type="submit" className="submit-button" 
+                disabled={!searchTerm}>
                 Поиск
             </button>
         </form>
@@ -55,7 +59,6 @@ const Form = ({ onSubmit, children }) => (
 const NoMatch = () => {
     return (<p>There's nothing here: 404!</p>);
 };
-
 
 
 export { Button, InputWithLabel, SearchForm, NoMatch, Form };

@@ -12,168 +12,12 @@ import { getTrainingByDate,
 } from './utils'; 
 import { UserDataContext } from "../app/appContext";
 import { trainingData } from './data';
-import styled from 'styled-components';
-
-// {
-//   "date": "2025-07-16T15:54:56.070Z",
-//   "training": [
-//     {
-//       "count": 0,
-//       "exercise": {
-//         "id": 0,
-//         "title": "string"
-//       },
-//       "load": [
-//         {
-//           "reps": 0,
-//           "expect": 0,
-//           "fact": 0
-//         }
-//       ]
-//     }
-//   ]
-// }
-
-const StyledContainer = styled.div`
-    display: flex;
-    gap: var(--gap-size);
-    flex-direction: column;
-    
-    .dateForm
-    {
-        flex: 1;
-        
-        .date-form-container
-        {
-            display: flex;
-            gap: var(--gap-size);
-            flex-direction: row;
-            justify-content: center;
-            align-items: start;
-            
-            button
-            {
-                background-color: #c1e15af4;
-            }
-        }
-
-        #date-time-part
-        {
-            display: flex;
-            flex-wrap:wrap;
-            gap: 0.2em;
-            justify-content: center;
-            
-            @media screen and (max-width: 768px) 
-            {
-                width: 10em;
-            }
-        }
-        
-    }
-
-    .trainingForm
-    {   
-        flex: 1;
-        .exs-list
-        {
-            display: flex;
-            gap: var(--gap-size);
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-content: center;
-            justify-content: center;
-            >div
-            {
-                margin-block-start: 0;
-            }
-        }
-
-        .input > input
-        {
-            width: 6rem;
-            padding: 0.5em;
-            text-align: center;
-        }
-        
-        .title
-        {
-            width: 18rem;
-            padding: 0.5em;
-            text-align: center;
-        }
-        
-        .form-button
-        {
-            padding: 1em;
-            display: flex;
-            gap: 0.3em;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: center;
-            
-            >button
-            {
-                min-width: 16em;
-                background-color:  #c1e15af4;
-            }
-            
-            
-        }
-
-    }
-
-    .training-action
-    {   
-        flex: 1;
-        display: flex;
-        gap: 0.3em;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: center;
-        
-        
-        
-        >span
-        {
-            margin-block-start: 0;
-            width: 16em;   
-        }
-        
-        .complete-button > button
-        {
-            background-color: #6ab479fe;
-        }
-        
-        .delete-button > button
-        {
-            background-color: #e14461bf;
-        }
-
-
-            
-        @media screen and (max-width: 768px) 
-        {   
-            button
-            {
-                width: 16em;
-            } 
-        }
-    }
-
-    .exercise
-    {
-        button
-        {
-            background-color: #b4c5abae;
-        }
-    }
-`;
+import { StyledContainer } from './styles';
 
 
 const Training = () => {
     
-    const [ cookies ] = useCookies();
+    const [ cookies, removeCookie ] = useCookies();
     const [ trainingDate, setTrainigDate ] = useState({ date: "", time:"", 
         isDateError: false });
     const [ successState, setSuccessState ] = useState({isCruSuccess: false, 
@@ -192,7 +36,6 @@ const Training = () => {
         changed.current = true;
     };
 
-    // training data
     const [ trainingForm, dispatchTraining ] = useReducer(
         trainingReducer, 
         { data: [], isLoading: false, isError:false, isCruError: false }
@@ -209,7 +52,8 @@ const Training = () => {
                     payload: data.training 
                 }
             );
-            setTrainigDate({ ...trainingDate, date: data.date, time: data.time});
+            setTrainigDate({ ...trainingDate, date: data.date, 
+                time: data.time});
         }            
     }, []);
 
@@ -245,6 +89,10 @@ const Training = () => {
         }
         catch (error)
         {
+            if (error?.response?.status == 401)
+            {
+                removeCookie("access_token");
+            }
             console.log(error)
             dispatchTraining({ type: 'TRAINING_FETCH_FAILURE' });
         }
@@ -295,6 +143,10 @@ const Training = () => {
         }
         catch (error)
         {
+            if (error?.response?.status == 401)
+            {
+                removeCookie("access_token");
+            }
             console.log(error)
             dispatchTraining({ type: 'TRAINING_CRU_FAILURE' }); // 
             return;
@@ -336,7 +188,12 @@ const Training = () => {
 
     const handleDelTraining = () => {
         delTrainingByDate(`${trainingDate.date}T${trainingDate.time}`, 
-            cookies.access_token); // change url
+            cookies.access_token).catch((error) => {
+                if (error?.response?.status == 401)
+                {
+                    removeCookie("access_token");
+                }
+            });
         dispatchTraining({ type: 'TRAINING_DEL' });
         setSuccessState({...successState, isDeleteSuccess: true});
             setTimeout(() => {
@@ -370,14 +227,26 @@ const Training = () => {
                         /> 
                     )
                 }
-                {successState.isCruSuccess && <p>Тренировка успешно сохранена</p>}
-                {successState.isDeleteSuccess && <p>Тренировка успешно удалена</p>}
+                {successState.isCruSuccess && <p>
+                    Тренировка успешно сохранена
+                    </p>}
+                {successState.isDeleteSuccess && <p>
+                    Тренировка успешно удалена
+                    </p>}
             </div>
             
             {Boolean(trainingForm.data.length) && 
                 <div className="training-action area stack"> 
-                    <span className="complete-button"><Button onClick={handleUpdateSubmit}>Создать тренировку Сохранить Изменения</Button></span>
-                    <span className="delete-button"><Button  onClick={handleDelTraining}>Удалить тренировку</Button></span>
+                    <span className="complete-button">
+                        <Button onClick={handleUpdateSubmit}>
+                            Создать тренировку Сохранить Изменения
+                        </Button>
+                    </span>
+                    <span className="delete-button">
+                        <Button  onClick={handleDelTraining}>
+                            Удалить тренировку
+                        </Button>
+                    </span>
                 </div>
             }
         </StyledContainer>

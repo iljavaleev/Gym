@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 const AddUserEx = ({ onDataChange }) => {
     const navigate = useNavigate();
     
-    const [ cookies ] = useCookies();    
+    const [ cookies, removeCookie ] = useCookies();    
     const [ add, setAdd ] = useState(false);
     const [ subm, setSubmit ] = useState(false);
     const [ ex, setEx ] = useState({ 
@@ -38,8 +38,13 @@ const AddUserEx = ({ onDataChange }) => {
         }
         catch (error)
         {
+            if (error?.response?.status == 401)
+            {
+                removeCookie("access_token");
+            }
             console.log(error)
-            setEx({ ...ex, isError: true, errorMsg: "Ошибка. Попробуйте позднее" });
+            setEx({ ...ex, isError: true, 
+                errorMsg: "Ошибка. Попробуйте позднее" });
         }   
         setSubmit(false);
     }, [subm]);
@@ -71,17 +76,24 @@ const AddUserEx = ({ onDataChange }) => {
 
     return (
         <>
-            <Button cls="create-close" onClick={handleClickOpen}>{add ? "-" : "+"}</Button>
+            <Button cls="create-close" onClick={handleClickOpen}>
+                {add ? "-" : "+"}
+            </Button>
             {
                 add && <div className="exs-container">
                     <div>Вы можете создать не более 20 своих упражнений</div>
-                    <InputWithLabel cls="custom-title" value={ex.title} onInputChange={onChange} help="введите название"/>
-                    <Button cls="comlete-button" onClick={onClick}>Создать</Button>
+                    <InputWithLabel cls="custom-title" value={ex.title} 
+                        onInputChange={onChange} help="введите название"/>
+                    <Button cls="comlete-button" onClick={onClick}>
+                        Создать
+                    </Button>
                     { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                     { ex.isSuccess && <><br/><strong>Успешно</strong></> }
                 </div>
             }
-            <Button cls="comlete-button" onClick={handleToTraining}>Обратно к тренировке</Button>
+            <Button cls="comlete-button" onClick={handleToTraining}>
+                Обратно к тренировке
+            </Button>
         </>
     );
 }
@@ -91,7 +103,8 @@ const ListEx = ({ onDelete }) => {
     return (
         <ul>
             {list.map((item) => (
-                <Item key={item.id} item={item.title} onDelete={() => onDelete(item.id)}/>
+                <Item key={item.id} item={item.title} 
+                    onDelete={() => onDelete(item.id)}/>
             ))}
         </ul>
     );

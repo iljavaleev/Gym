@@ -18,7 +18,8 @@ const getToken = async (url, form_data) => {
         }
     }
     const decoded = parseJwt(result.data.access_token);
-    return { access_token: result.data.access_token, user_id: decoded.user_id, expire: decoded.exp }
+    return { access_token: result.data.access_token, 
+        user_id: decoded.user_id, expire: decoded.exp }
     
 }
 
@@ -47,8 +48,7 @@ const submit = async (form, error, setError, url) => {
         console.log(error)
         console.info("Failed to get token");
         setError({ ...error, submit_error: "Auth error"})
-    }
-        
+    }    
 };
 
 export { submit };

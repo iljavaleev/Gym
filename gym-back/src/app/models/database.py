@@ -23,7 +23,7 @@ class Endurance(Base):
 
 
 class Strength(Base):
-    __tablename__ = "strenght"
+    __tablename__ = "strength"
     id: Mapped[int] = mapped_column(primary_key=True)
     exercise: Mapped[str]
     reps: Mapped[str]
@@ -41,16 +41,19 @@ class User(Base):
 
 class Exercise(Base):
     __tablename__ = "user_exercise"
-    __table_args__ = (UniqueConstraint("user_id", "title", name="unique_user_ex"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "title", name="unique_user_ex"),
+    )
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("gym_user.id"), nullable=True)
     title: Mapped[str]
     
-# many to many user - exercise
+
 class Workout(Base):
     __tablename__ = "workout"
     __table_args__ = (
-        UniqueConstraint("date", "user_id", "exercise", name="unique_workout_ex"),
+        UniqueConstraint("date", "user_id", "exercise", 
+                         name="unique_workout_ex"),
         UniqueConstraint("count", "date", name="unique_count_ex"),
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -58,7 +61,8 @@ class Workout(Base):
     user_id: Mapped[int] = mapped_column(Integer, 
         ForeignKey("gym_user.id", ondelete="CASCADE")
     )
-    exercise: Mapped[int] = mapped_column(ForeignKey("user_exercise.id", ondelete="SET NULL"))
+    exercise: Mapped[int] = mapped_column(
+        ForeignKey("user_exercise.id", ondelete="SET NULL"))
     date: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), 
                                                     nullable=False)
     
@@ -76,37 +80,3 @@ class Load(Base):
                     name="check2")
     CheckConstraint("expect is None or (expect >= 0 and expect < 500)", 
                     name="check3")
-
-
-# from sqlalchemy import select, create_engine
-# from sqlalchemy.orm import Session, sessionmaker
-
-# PSQL_DATABASE_URL = "postgresql+psycopg2://postgres@localhost:5432/postgres"
-
-# def get_engine():
-#       return create_engine(PSQL_DATABASE_URL)
-
-
-# def get_session():
-#       session_maker: Session = sessionmaker(autocommit=False, autoflush=False, bind=get_engine())
-#       try:
-#          session = session_maker()
-#          return session
-#       finally:
-#          session.close()
-
-
-# if __name__ == "__main__":
-#     stmnt = (
-#         select(Exercise.title, Load.reps, Load.expect, Load.fact)      
-#         .where(Workout.date == '01-01-2002 10:30:00')
-#         .select_from(Workout)
-#         .join(Load, Load.workout == Workout.id)
-#         .join(Exercise, Exercise.id == Workout.exercise)      
-#         .order_by(Workout.id, Load.id)
-#     )
-
-#     session: Session = get_session()
-#     res = session.execute(statement=stmnt)
-#     for exercise, reps, expect, fact in res:
-#         print(exercise, reps, expect, fact)

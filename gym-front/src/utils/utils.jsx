@@ -1,4 +1,3 @@
-
 const getDirtyFields = (form, initial_state) => {
     return  (
                 Object.keys(form).reduce((acc, key) => {
@@ -16,7 +15,7 @@ const getErrorFields = (form, restrictions) =>
         
         const errorsPerField = restrictions[key]
             .map((validation) => ({
-                isValid: validation.isValid(form[key]), // bool
+                isValid: validation.isValid(form[key]), 
                 message: validation.message,
             }))
             .filter((errorPerField) => !errorPerField.isValid);

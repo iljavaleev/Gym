@@ -1,11 +1,11 @@
 from sqlalchemy import delete
-from app.models.database import Exercise
-from app.models.models import UserExercise, UserInDB
-from app.db_connection import get_session
+from models.database import Exercise
+from models.models import UserExercise, UserInDB
+from db_connection import get_session
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, Query, status, APIRouter
-from app.dependencies import get_current_user
-from typing import Annotated, List, Optional
+from dependencies import get_current_user
+from typing import Annotated, List
 
 import logging
 
@@ -49,8 +49,6 @@ async def create_exercise(ex: UserExercise,
             detail="DB error")
     
     return dbex
-
-# http://localhost:8000/api/v1/user-exercise?ex=${id}
 
 
 @router.delete("/api/v1/user-exercise", status_code=status.HTTP_200_OK)

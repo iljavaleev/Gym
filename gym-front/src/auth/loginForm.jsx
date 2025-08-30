@@ -6,25 +6,8 @@ import { useLocation, Link, useNavigate } from 'react-router';
 import { useCookies } from 'react-cookie';
 
 import { submit } from './utils';
-import styled from 'styled-components';
+import { StyledForm } from './styles';
 
-const StyledForm = styled.form`
-    display: flex;
-    gap: var(--gap-size);
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: start;
-    .to-register
-    {
-       
-        font-size: 0.8em;
-    }
-    button
-    {
-        background-color: #eaf133c9;
-    }
-    
-`;
 
 const ENDPOINT = "http://localhost:8000/api/v1/login";
 
@@ -67,7 +50,8 @@ const LoginForm = () => {
         if (result)
         {
             const { access_token, user_id, expire } = result;
-            setCookie("access_token", access_token, {expires: new Date(expire * 1000)});            
+            setCookie("access_token", access_token, {
+                expires: new Date(expire * 1000)});            
             setCookie("user_id", user_id);
             const origin = location.state?.from?.pathname || '/';
             navigate(origin);
@@ -101,7 +85,12 @@ const LoginForm = () => {
                 </span>):null}  
             <button type="submit" disabled={hasChanges}>Войти</button>
             
-            <div className="to-register">Еще нет аккаунта?<Link to="/register" replace state={{from: location}}> Зарегестрируйтесь</Link></div>
+            <div className="to-register">
+                Еще нет аккаунта?
+                <Link to="/register" replace state={{from: location}}> 
+                    Зарегестрируйтесь
+                </Link>
+            </div>
             </StyledForm>
             {error.submit_error}
         </div>

@@ -4,7 +4,7 @@ import axios from "axios";
 const EXERCISE_URL = "http://localhost:8000/api/v1/user-exercise";
 
 const formatDelExUrl = (id) =>
-    `http://localhost:8000/api/v1/user-exercise?id=${id}`;
+    `"http://localhost:8000/api/v1/user-exercise?id="${id}`;
 
 
 const getUserExs = async (token) => {
