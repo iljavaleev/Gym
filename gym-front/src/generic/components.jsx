@@ -1,13 +1,4 @@
-import styled from 'styled-components';
-
-const StyledGenericList = styled.div`
-    ul li::marker 
-    {
-        color: #578f6dff;
-        font-size: 1.2em;
-    }
-`;
-
+import { StyledGenericList } from "./styles";
 
 const List = ({ list }) => {
     let count = 0;

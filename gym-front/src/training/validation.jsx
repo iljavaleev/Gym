@@ -2,14 +2,14 @@ import { trainingData } from "./data";
 
 
 const VALIDATION = {
-    exercise: [
+    exercise:
         {
             isValid: (value, list=trainingData) => {
                 return value.title && list.some(el => el.title === value.title);
             },
-            message: 'Выберите упражнение из списка или содайте свое упражнение. Оно добавится в список автоматически'
-        }
-    ],
+            message: 'Выберите упражнение из списка или содайте свое \
+            упражнение. Оно добавится в список автоматически'
+        },
     reps: [
         {
             isValid: (value) => /^\d+$/.test(value),

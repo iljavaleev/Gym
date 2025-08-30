@@ -47,7 +47,8 @@ const trainingReducer = (state, action) => {
             }
             return { ...state };
         case 'SET_ADD':
-            state.data[action.idx].load.push(JSON.parse(JSON.stringify(to_add_set)));
+            state.data[action.idx].load.push(JSON.parse(
+                JSON.stringify(to_add_set)));
             return { ...state };
         case 'TRAINING_DEL':
             state.data.length = 0;

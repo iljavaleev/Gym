@@ -3,16 +3,17 @@ from typing import Annotated
 import jwt
 from fastapi import Depends, HTTPException, status
 from jwt.exceptions import InvalidTokenError
-from app.models.models import  TokenData
-from app.routers.auth import oauth2_scheme, get_user
-from app.db_connection import get_session
+from models.models import  TokenData
+from routers.auth import oauth2_scheme, get_user
+from db_connection import get_session
+import os
 
-SECRET_KEY = "ce5992eeaf88d3ee4066e9bd0fb075905b8c248db9114872eb856bf7e29fb42a"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session = Depends(get_session)):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], 
+                           session = Depends(get_session)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

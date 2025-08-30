@@ -11,7 +11,9 @@ const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
     return (
         <form onSubmit={onSubmit} className="date-form-container">
             <div id="date-time-part">
-                <button type="submit" name="by_date">Найти тренировку по дате</button>
+                <button type="submit" name="by_date">
+                    Найти тренировку по дате
+                </button>
                 <br/> 
                 <InputWithLabel id="training-date" 
                     value={searchTerm.date} onInputChange={onChangeDate} 
@@ -23,7 +25,9 @@ const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
                 </InputWithLabel>
             </div>
             <br/> 
-            <button type="submit" name="next">Найти ближайшую тренировку</button>
+            <button type="submit" name="next">
+                Найти ближайшую тренировку
+            </button>
         </form> 
     );
 }
@@ -54,7 +58,9 @@ const TrainingFormList = ({ list, addEx, delEx, addSet, delSet, changed }) => {
                 <div className="form-button">
                     <Button  onClick={addEx}>Добавить Упражнение</Button>
                     <Button  onClick={delEx}>Удалить Упражнение</Button>
-                    <Button onClick={()=>{navigate("/my-training/exercise")}}>Создать свое упражнение</Button>
+                    <Button onClick={()=>{navigate("/my-training/exercise")}}>
+                        Создать свое упражнение
+                    </Button>
                 </div>
             </form>
         </>
@@ -84,8 +90,10 @@ const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
 
             {showError && <p>{item.error}</p>}
 
-            <Button className="button-" onClick={() => { addSet(exNum); removeError(); }}>+</Button>
-            <Button className="button+" onClick={() => { delSet(exNum); removeError(); }}>-</Button>
+            <Button className="button-" onClick={() => { 
+                addSet(exNum); removeError(); }}>+</Button>
+            <Button className="button+" onClick={() => { 
+                delSet(exNum); removeError(); }}>-</Button>
         </div>
     );
 };
@@ -101,7 +109,9 @@ const AutocompleteInput = ({ item, id, removeError, changed }) => {
     
     const filtered = inputValue ? userTrainingData.current.filter(suggestion => 
         {   
-            const re = new RegExp(`(^| )(${inputValue?.title?.toLowerCase().trim()})+`);
+            const re = new RegExp(
+                `(^| )(${inputValue?.title?.toLowerCase().trim()})+`
+            );
             return re.test(suggestion.title.toLowerCase());
         }
     ) : [];
@@ -112,7 +122,8 @@ const AutocompleteInput = ({ item, id, removeError, changed }) => {
     };
 
     const handleSuggestionClick = (suggestion) => {
-        setInputValue({ ...inputValue, title: suggestion.title, id: suggestion.id});
+        setInputValue({ ...inputValue, title: suggestion.title, 
+            id: suggestion.id});
         item.exercise.title = suggestion.title;
         item.exercise.id = suggestion.id;
         setShowSuggestions(false);

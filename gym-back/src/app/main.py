@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
-from fastapi import Depends, HTTPException, status, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import generic, auth, exercise, training
-from app.db_connection import get_engine
-from app.models.database import Base
-
+from routers import generic, auth, exercise, training
+from db_connection import get_engine
+from models.database import Base
+import pandas as pd
 import logging
+import os
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -13,9 +14,19 @@ logger = logging.getLogger('uvicorn.error')
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=get_engine())
+    engine = get_engine()
+    try:
+        df = pd.read_csv(os.getenv("ENDURANCE_FILE_PATH"))
+        df.to_sql('endurance', engine, if_exists='replace', index=False)
+
+        df = pd.read_csv(os.getenv('STRENGTH_FILE_PATH'))
+        df.to_sql('strength', engine, if_exists='replace', index=False)
+    except FileNotFoundError:
+        pass
+    
     yield
 
-origins = ["http://localhost:5173/"]
+origins = [os.getenv("FRONT_URL")]
 
 
 app = FastAPI(title="Saas application", lifespan=lifespan)

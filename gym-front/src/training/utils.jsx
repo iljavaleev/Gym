@@ -1,9 +1,7 @@
 import { VALIDATION } from "./validation";
 import axios from "axios";
 
-const getInitialQueryUrl = () => 
-    `http://localhost:8000/api/v1/user-next-training`
-
+const getInitialQueryUrl = () => "http://localhost:8000/api/v1/user-next-training";
 
 const formatGetDelTrainigUrl = (date) => 
     `http://localhost:8000/api/v1/user-training?date=${date}`

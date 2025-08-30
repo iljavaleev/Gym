@@ -5,25 +5,22 @@ from email_validator import (
     EmailNotValidError,
     validate_email,
 )
-
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from psycopg2 import IntegrityError
-from pydantic import BaseModel
-from app.models.models import UserInDB, TokenData, Token
-from app.models.database import User
+from models.models import UserInDB, Token
+from models.database import User
 from sqlalchemy.orm import Session
 import logging
-from app.db_connection import get_session
+from db_connection import get_session
+import os
 
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "ce5992eeaf88d3ee4066e9bd0fb075905b8c248db9114872eb856bf7e29fb42a"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -70,7 +67,8 @@ async def authenticate_user(email: str, password: str, session) -> UserInDB:
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def create_access_token(data: dict, 
+                        expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -82,9 +80,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 @router.post("/api/v1/login", status_code=status.HTTP_200_OK)
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[Session, Depends(get_session)]):
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
+                session: Annotated[Session, Depends(get_session)]):
     
-    user: UserInDB = await authenticate_user(form_data.username, form_data.password, session)
+    user: UserInDB = await authenticate_user(form_data.username, 
+                                             form_data.password, session)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -93,13 +93,15 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], sess
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email, "user_id": user.id}, expires_delta=access_token_expires
+        data={"sub": user.email, "user_id": user.id}, 
+        expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
 
 
 @router.post("/api/v1/register", status_code=status.HTTP_201_CREATED)
-async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[Session, Depends(get_session)]):
+async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
+                   session: Annotated[Session, Depends(get_session)]):
     try:
         user: UserInDB = await get_user(form_data.username, session)
     except Exception as e:
@@ -112,7 +114,7 @@ async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], s
     user: UserInDB = None
     try:
         user = await add_user(email=form_data.username, 
-                                    password=form_data.password, session=session)
+                              password=form_data.password, session=session)
     except IntegrityError as e:
         logger.error(e)
         raise HTTPException(
@@ -122,8 +124,7 @@ async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], s
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email, "user_id": user.id}, expires_delta=access_token_expires
+        data={"sub": user.email, "user_id": user.id}, 
+        expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
-
-    

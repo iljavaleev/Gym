@@ -1,10 +1,11 @@
-from psycopg2 import IntegrityError
-from app.models.database import Exercise, Load, Workout
-from app.models.models import UserTraining, UserInDB, UserLoad, UserWorkout, UserExercise
-from app.db_connection import get_session
+from models.database import Exercise, Load, Workout
+from models.models import (
+    UserTraining, UserInDB, UserLoad, UserWorkout, UserExercise
+)
+from db_connection import get_session
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter
-from app.dependencies import get_current_user
+from dependencies import get_current_user
 from typing import Annotated, Optional
 from datetime import datetime
 from sqlalchemy import select, delete, ChunkedIteratorResult
@@ -18,7 +19,6 @@ router = APIRouter()
 
 logger = logging.getLogger("uvicorn.error")
 
-# change 
 def get_query(stmnt, session, req_date=None) -> UserTraining | None:
     res = None
     try:
@@ -28,7 +28,8 @@ def get_query(stmnt, session, req_date=None) -> UserTraining | None:
         raise HTTPException(status_code=502, detail="Database error")
     
     if not res:
-        return UserTraining(date=datetime.now(), training=[])
+        return UserTraining(date=req_date if req_date else datetime.now(), 
+                            training=[])
     
     res_dict: dict = {} 
     training = []
@@ -45,7 +46,8 @@ def get_query(stmnt, session, req_date=None) -> UserTraining | None:
             load=v))
         
     logger.error(date)
-    user_traning = UserTraining(date=req_date if req_date else date, training=training)
+    user_traning = UserTraining(date=req_date if req_date else date, 
+                                training=training)
 
     del res_dict
     return user_traning

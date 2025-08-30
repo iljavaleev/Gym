@@ -3,72 +3,7 @@ import { useStorageState } from "../customhooks/hooks"
 import { List } from "./components";
 import { useReducer, useState, useEffect } from "react";
 import axios from 'axios';
-import styled from 'styled-components';
-
-const StyledGenContainer = styled.div`
-    display: flex;
-    gap: var(--gap-size);
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    
-
-    .program-choice
-    {
-        flex: 1;
-        
-        display: flex;
-        gap: 1em;
-        flex-wrap: wrap;
-        flex-direction: column;
-        justify-content: center;
-        align-items: start;
-
-
-    }
-
-    .program-search
-    {   
-        flex: 1;
-        @media screen and (max-width: 768px) 
-        {
-            flex: 1 100%;
-        }
-    }
-
-    .program-search-label
-    {
-        font-size: 1.2em;
-    }
-`;
-
-const StyledSearchForm = styled.div`
-    input
-    {
-        width: 4rem;
-        padding: 0.4em;
-        text-align: center;
-    }
-    .submit-button
-    {
-        background-color:  #c1e15af4;
-    }
-`;
-
-const StyledButton = styled.div`
-    button
-    {
-        color: black;
-        padding: 0.6em 0.8em;
-        border: none;
-        border-radius: 10px; 
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-    button:hover {
-        transform: translateY(-2px); /* Slight lift on hover */
-    }
-`;
+import { StyledGenContainer, StyledButton, StyledSearchForm  } from "./styles";
 
 const formatUrl = (book, number) =>  
     `http://localhost:8000/api/v1/search?book=${book}&number=${number}`;
@@ -105,7 +40,8 @@ const getTrainingByNumber = async (url) => {
 }
 
 const Generic = () => {
-    const [searchNumberTerm, setSearchNumberTerm] = useStorageState("search", "1");
+    const [searchNumberTerm, setSearchNumberTerm] = 
+        useStorageState("search", "1");
     const [bookTerm, setBookTerm] = useState(0);
 
     const [stories, dispatchStories] = useReducer(
@@ -135,9 +71,11 @@ const Generic = () => {
                 try
                 {
                     const result = await getTrainingByNumber(url);
-                    localStorage.setItem(url, JSON.stringify(result.data.stories));
+                    localStorage.setItem(url, JSON.stringify(
+                        result.data.stories));
                     dispatchStories(
-                        { type: "TRAINING_FETCH_SUCCESS", payload: result.data.stories }
+                        { type: "TRAINING_FETCH_SUCCESS", 
+                            payload: result.data.stories }
                     );
                 }
                 catch (error)
@@ -149,16 +87,26 @@ const Generic = () => {
        
     }, [url]);
 
-    const handleSearch = (event) => { setSearchNumberTerm(event.target.value); };
+    const handleSearch = (event) => {setSearchNumberTerm(event.target.value);};
     return (
         <StyledGenContainer>
             <div className="program-choice area">
                 <div>
-                    <span className="program-search-label">Выберите программу</span><br/>
+                    <span className="program-search-label">
+                        Выберите программу
+                    </span><br/>
                     &nbsp;
                     <StyledButton>
-                        <Button  style={{ backgroundColor: !bookTerm ? "#578f6db4" : "#fffefef8"}} onClick={() => setBookTerm(0)} >Пауэрлифтинг</Button>
-                        <Button  style={{ backgroundColor: bookTerm ? "#578f6dbb" : "#fffefef8"}} onClick={() => setBookTerm(1)} >Похудайка</Button>
+                        <Button  
+                            style={{backgroundColor: !bookTerm ? "#578f6db4" : 
+                                "#fffefef8"}} 
+                            onClick={() => setBookTerm(0)} >Пауэрлифтинг
+                        </Button>
+                        <Button  
+                            style={{ backgroundColor: bookTerm ? "#578f6dbb" :
+                             "#fffefef8"}} onClick={() => setBookTerm(1)} >
+                                Похудайка
+                        </Button>
                     </StyledButton>
                 </div>
         
