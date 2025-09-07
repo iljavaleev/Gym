@@ -135,7 +135,7 @@ const Training = () => {
 
         try
         {
-            postTrainingByDate(
+            await postTrainingByDate(
                 {date: `${trainingDate.date}T${trainingDate.time}`, 
                     training: trainingForm.data},
                 cookies.access_token
@@ -186,8 +186,8 @@ const Training = () => {
         changed.current = true; 
     };
 
-    const handleDelTraining = () => {
-        delTrainingByDate(`${trainingDate.date}T${trainingDate.time}`, 
+    const handleDelTraining = async () => {
+        await delTrainingByDate(`${trainingDate.date}T${trainingDate.time}`, 
             cookies.access_token).catch((error) => {
                 if (error?.response?.status == 401)
                 {

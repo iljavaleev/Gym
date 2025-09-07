@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, memo } from "react";
 import { InputWithLabel, Button } from "../components/components";
 import { postUserEx } from "./utils";
 import { useCookies } from "react-cookie";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 
 
 const AddUserEx = ({ onDataChange }) => {
+    console.log("ex")
     const navigate = useNavigate();
     
     const [ cookies, removeCookie ] = useCookies();    
@@ -98,7 +99,8 @@ const AddUserEx = ({ onDataChange }) => {
     );
 }
 
-const ListEx = ({ onDelete }) => {
+const ListEx = memo(({ onDelete }) => {
+     console.log("list")
     const list = useContext(UserDataContext);
     return (
         <ul>
@@ -108,14 +110,16 @@ const ListEx = ({ onDelete }) => {
             ))}
         </ul>
     );
-};
+});
 
-const Item = ({ item, onDelete }) => (
+const Item = memo(({ item, onDelete }) => {
+    console.log("item")
+    return (
     <li>
         <span>{item}</span>
         &nbsp;
         <Button onClick={onDelete}>-</Button>
     </li>
-);
+)});
 
 export { AddUserEx, ListEx };

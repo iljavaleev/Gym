@@ -16,7 +16,7 @@ class Endurance(Base):
     __tablename__ = "endurance"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     exercise: Mapped[str]
-    reps: Mapped[str]
+    reps: Mapped[str] = mapped_column(nullable=True)
     superset: Mapped[int|None]
     work_id: Mapped[int] = mapped_column(nullable=False)
     week_id: Mapped[int] = mapped_column(nullable=False)
@@ -26,7 +26,7 @@ class Strength(Base):
     __tablename__ = "strength"
     id: Mapped[int] = mapped_column(primary_key=True)
     exercise: Mapped[str]
-    reps: Mapped[str]
+    reps: Mapped[str] = mapped_column(nullable=True)
     work_id: Mapped[int] = mapped_column(nullable=False)
     week_id: Mapped[int] = mapped_column(nullable=False)
 
@@ -62,7 +62,7 @@ class Workout(Base):
         ForeignKey("gym_user.id", ondelete="CASCADE")
     )
     exercise: Mapped[int] = mapped_column(
-        ForeignKey("user_exercise.id", ondelete="SET NULL"))
+        ForeignKey("user_exercise.id", ondelete="SET NULL"), nullable=True)
     date: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), 
                                                     nullable=False)
     
