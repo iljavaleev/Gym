@@ -22,10 +22,11 @@ async def lifespan(app: FastAPI):
     def sql_query(table, file_path):
         drop_query = f"DELETE FROM {table};"
         copy_query = f"\\COPY {table} FROM '{file_path}' DELIMITER '|' CSV HEADER"
-        
+        idx_query = f"SELECT setval('{table}_id_seq', max(id)) FROM {table};"
+
         return f"{query_base} -c '{drop_query}'", \
-            f'{query_base} -c "{copy_query}";'
-        
+            f'{query_base} -c "{copy_query}";', \
+            f'{query_base} -c "{idx_query}";'
     try:
 
         table = "endurance"

@@ -8,7 +8,6 @@ import { useNavigate } from "react-router";
 
 
 const AddUserEx = ({ onDataChange }) => {
-    console.log("ex")
     const navigate = useNavigate();
     
     const [ cookies, removeCookie ] = useCookies();    
@@ -21,7 +20,6 @@ const AddUserEx = ({ onDataChange }) => {
     });
     
     const data = useContext(UserDataContext);
-
     useEffect(() => {
         if (!subm) return;
         if (!ex.title) return;
@@ -35,6 +33,7 @@ const AddUserEx = ({ onDataChange }) => {
                 data.push({ id: result.data.id, title: result.data.title});
                 onDataChange([...data]);
                 setEx({ title:"", isError: false, isSuccess: true });
+                setTimeout(() => setEx({...ex, title:"", isSuccess: false}), 2000);
             })();
         }
         catch (error)
@@ -85,9 +84,9 @@ const AddUserEx = ({ onDataChange }) => {
                     <div>Вы можете создать не более 20 своих упражнений</div>
                     <InputWithLabel cls="custom-title" value={ex.title} 
                         onInputChange={onChange} help="введите название"/>
-                    <Button cls="comlete-button" onClick={onClick}>
+                    {data.length < 20 && <Button cls="comlete-button" onClick={onClick}>
                         Создать
-                    </Button>
+                    </Button>}
                     { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                     { ex.isSuccess && <><br/><strong>Успешно</strong></> }
                 </div>
@@ -100,7 +99,6 @@ const AddUserEx = ({ onDataChange }) => {
 }
 
 const ListEx = memo(({ onDelete }) => {
-     console.log("list")
     const list = useContext(UserDataContext);
     return (
         <ul>
@@ -113,7 +111,6 @@ const ListEx = memo(({ onDelete }) => {
 });
 
 const Item = memo(({ item, onDelete }) => {
-    console.log("item")
     return (
     <li>
         <span>{item}</span>

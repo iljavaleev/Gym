@@ -196,7 +196,7 @@ const Training = () => {
             });
         dispatchTraining({ type: 'TRAINING_DEL' });
         setSuccessState({...successState, isDeleteSuccess: true});
-            setTimeout(() => {
+        setTimeout(() => {
                 setSuccessState({...successState, isDeleteSuccess: false});
         }, 3000);
     }
