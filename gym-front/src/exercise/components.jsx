@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, memo } from "react";
 import { InputWithLabel, Button } from "../components/components";
 import { postUserEx } from "./utils";
 import { useCookies } from "react-cookie";
@@ -20,7 +20,6 @@ const AddUserEx = ({ onDataChange }) => {
     });
     
     const data = useContext(UserDataContext);
-
     useEffect(() => {
         if (!subm) return;
         if (!ex.title) return;
@@ -34,6 +33,7 @@ const AddUserEx = ({ onDataChange }) => {
                 data.push({ id: result.data.id, title: result.data.title});
                 onDataChange([...data]);
                 setEx({ title:"", isError: false, isSuccess: true });
+                setTimeout(() => setEx({...ex, title:"", isSuccess: false}), 2000);
             })();
         }
         catch (error)
@@ -84,9 +84,9 @@ const AddUserEx = ({ onDataChange }) => {
                     <div>Вы можете создать не более 20 своих упражнений</div>
                     <InputWithLabel cls="custom-title" value={ex.title} 
                         onInputChange={onChange} help="введите название"/>
-                    <Button cls="comlete-button" onClick={onClick}>
+                    {data.length < 20 && <Button cls="comlete-button" onClick={onClick}>
                         Создать
-                    </Button>
+                    </Button>}
                     { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                     { ex.isSuccess && <><br/><strong>Успешно</strong></> }
                 </div>
@@ -98,7 +98,7 @@ const AddUserEx = ({ onDataChange }) => {
     );
 }
 
-const ListEx = ({ onDelete }) => {
+const ListEx = memo(({ onDelete }) => {
     const list = useContext(UserDataContext);
     return (
         <ul>
@@ -108,14 +108,15 @@ const ListEx = ({ onDelete }) => {
             ))}
         </ul>
     );
-};
+});
 
-const Item = ({ item, onDelete }) => (
+const Item = memo(({ item, onDelete }) => {
+    return (
     <li>
         <span>{item}</span>
         &nbsp;
         <Button onClick={onDelete}>-</Button>
     </li>
-);
+)});
 
 export { AddUserEx, ListEx };

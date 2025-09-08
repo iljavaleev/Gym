@@ -10,7 +10,8 @@ import { useCookies } from "react-cookie";
 import { useEffect, useState } from 'react';
 import { getUserExs } from '../exercise/utils';
 import { UserDataContext } from './appContext';
-import { StyledChiled, StyledContainer, StyledNav } from './styles';
+import { StyledChiled, StyledContainer, StyledNavDesk, StyledNavMobile, StyledMenu } from './styles';
+import {LoginIcon, LogoutIcon, RegisterIcon, MyTrainingIcon, CalendarIcon} from '../icons/navicons'
 
 
 const ProtectedRoute = ({ children }) => {
@@ -90,14 +91,14 @@ const MyTraining = ({onChange}) => {
 const Layout = ( {token, onLogout} ) => {
   return (
      <StyledContainer>
-      <nav>
-        <StyledNav className="mobile-footer">
+      <StyledNavDesk>
+        <StyledMenu>
           <li><NavLink to="/" >Программа тренировок</NavLink></li>
-          <li><NavLink to="/my-training" >Мои тренировки</NavLink></li>
+          <li><NavLink to="/my-training">Мои тренировки</NavLink></li>
           {!token && 
             <li>
                 <NavLink className="nav-right" to="/login">
-                  Вход
+                  Вход 
                 </NavLink>
             </li>}
           {!token && 
@@ -112,13 +113,39 @@ const Layout = ( {token, onLogout} ) => {
                 Выйти
               </NavLink>
           </li>}           
-        </StyledNav>
-      </nav>
+        </StyledMenu>
+      </StyledNavDesk>
+      <StyledNavMobile>
+        <StyledMenu className="mobile-footer">
+          <li><NavLink to="/"><CalendarIcon label={"программа"}/></NavLink></li>
+          <li><NavLink to="/my-training"><MyTrainingIcon label={"мои тренировки"}/></NavLink></li>
+          {!token && 
+            <li>
+                <NavLink className="nav-right" to="/login">
+                  <LoginIcon label={"вход"}/>
+                </NavLink>
+            </li>}
+          {!token && 
+            <li>
+              <NavLink className="nav-right" to="/register">
+                <RegisterIcon label={"регистрация"}/>
+              </NavLink>
+            </li>}
+          {token && 
+            <li>
+              <NavLink className="nav-right" to="/"onClick={onLogout}>
+                <LogoutIcon label={"выйти"}/>
+              </NavLink>
+          </li>}           
+        </StyledMenu>
+      </StyledNavMobile>
+
       <StyledChiled>
         <Outlet />
       </StyledChiled>
      </StyledContainer>
   );
 };
+
 
 export default App

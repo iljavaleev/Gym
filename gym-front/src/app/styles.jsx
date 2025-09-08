@@ -5,17 +5,35 @@ const StyledContainer = styled.div`
     margin-inline: auto;
 `;
 
-const StyledNav = styled.ul`
+const StyledNavMobile = styled.nav`
+    display: none; 
     @media screen and (max-width: 768px) 
     {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); 
-      z-index: 1000; 
+        display: block;
+    }
+`;
+
+
+const StyledNavDesk = styled.nav`
+    @media screen and (max-width: 768px) 
+    {
+        display: none;
+    }
+`;
+
+
+const StyledMenu = styled.ul`
+   
+    @media screen and (max-width: 768px) 
+    {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); 
+        z-index: 1000; 
     }
 
     display: flex;
@@ -92,4 +110,5 @@ const StyledChiled = styled.div`
     }
 `;
 
-export { StyledChiled, StyledNav, StyledContainer };
+
+export { StyledChiled, StyledMenu, StyledContainer, StyledNavMobile, StyledNavDesk };

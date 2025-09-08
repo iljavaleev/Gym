@@ -30,11 +30,14 @@ const StyledContainer = styled.div`
             gap: 0.2em;
             justify-content: center;
             
+
             @media screen and (max-width: 768px) 
             {
                 width: 10em;
             }
         }
+
+        
         
     }
 
@@ -133,6 +136,17 @@ const StyledContainer = styled.div`
         {
             background-color: #b4c5abae;
         }
+    }
+    
+    .scrollable-list
+    {
+        display: flex;
+        gap: var(--gap-size);
+        flex-direction: column;
+        max-height: 10em;
+        max-width: 18em;
+        overflow: auto;
+        cursor: pointer; 
     }
 `;
 
