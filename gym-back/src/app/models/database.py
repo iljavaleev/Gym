@@ -78,5 +78,5 @@ class Load(Base):
     CheckConstraint("reps > 0 and reps < 100", name="check1")
     CheckConstraint("expect is None or (expect >= 0 and expect < 500)", 
                     name="check2")
-    CheckConstraint("expect is None or (expect >= 0 and expect < 500)", 
+    CheckConstraint("fact is None or (fact >= 0 and fact < 500)", 
                     name="check3")
