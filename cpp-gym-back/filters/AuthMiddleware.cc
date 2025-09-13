@@ -1,6 +1,7 @@
 #include "AuthMiddleware.h"
 #include <ranges>
 #include <memory>
+#include <drogon/drogon.h>
 
 #include "models/GymUser.h"
 #include "utils/utils.hpp"
@@ -32,7 +33,8 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
         mcb(HttpResponse::newNotFoundResponse(req));
         return;
     }
-    // chenge to form
+    // drogon::MultiPartParser parser;
+   
     // auto json_value = req->getJsonObject();
     // if (json_value)
     // {
@@ -46,8 +48,12 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
     //     req->setBody(val.toStyledString());
     // }
     
-
-    // nextCb([&req, mcb = std::move(mcb)](const HttpResponsePtr &resp) { mcb(resp); });
+    nextCb([&, mcb = std::move(mcb)](const HttpResponsePtr &resp) 
+        {   
+            resp->setBody((*user).toJson().toStyledString());
+            mcb(resp); 
+        }
+    );
 }
 
 

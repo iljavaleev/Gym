@@ -3,6 +3,9 @@
 #include "models/GymUser.h"
 #include <memory>
 #include <jwt-cpp/jwt.h>
+#include <future>
+#include <functional> 
+#include <regex>
 
 using drogon_model::cpp_gymdb::GymUser;
 using drogon::orm::Criteria;
@@ -13,25 +16,33 @@ using drogon::orm::Mapper;
 bool validateEmail(std::string_view email)
 {
    const std::regex pattern("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
-   return std::regex_match(email, pattern);
+   return std::regex_match(email.begin(), email.end(), pattern);
+}
+
+bool validatePassword(std::string_view)
+{
+    return password.length() && password.length() > 6;
 }
 
 bool verifyPassword(std::string_view password, std::string_view hash)
 {
-    return bcrypt::validatePassword(password, hash);
+    return bcrypt::validatePassword(password.data(), hash.data());
 }
 
-std::string_view getPasswordHash(std::string_view password)
+std::string getPasswordHash(std::string_view password)
 {
-    return bcrypt::generateHash(password);
+    return bcrypt::generateHash(password.data());
 }
 
 std::shared_ptr<GymUser> addUser(std::string_view email, 
     std::string_view password, drogon::orm::DbClientPtr clientPtr)
 {
-    std::string hashedPassword = bcrypt::generateHash(password);
+    std::string hashedPassword = getPasswordHash(password);
   
     Mapper<GymUser> mp(clientPtr);
+    GymUser user;
+    user.setEmail(email.data());
+    user.setHashedPassword(hashedPassword.data());
     auto res_future = mp.insertFuture(std::move(user));
     try
     {
@@ -70,14 +81,16 @@ std::shared_ptr<GymUser> getUser(std::string_view email,
 }
    
 std::shared_ptr<GymUser> authenticateUser(std::string_view email, 
-    std::string_view password, drogon::orm::DbClientPtr)
+    std::string_view password, drogon::orm::DbClientPtr clientPtr)
 {
-    if (not verifyPassword(password, user.hashed_password))
-        return nullptr;
-    auto future_res = std::async(&getUser, email, password);
+   
+    auto future_res = std::async(&getUser, email, drogon::app().getDbClient());
     try
-    {
-        return future_res.get();
+    {   
+        auto db_user = future_res.get();
+        if (not db_user || not verifyPassword(password, *db_user->getHashedPassword()))
+            return nullptr;
+        return db_user;
     }
     catch(const std::exception& e)
     {
@@ -102,21 +115,21 @@ std::string createAccessToken(Json::Value& data)
         token = token.set_payload_claim(elem, 
             jwt::claim(data[elem].asString())); 
     }
-
-    token = token.set_payload_claim("exp", jwt::claim(exp)); 
+   
+    token = token.set_payload_claim("exp", jwt::claim(std::to_string(exp.count()))); 
     return token.sign(jwt::algorithm::hs256{SECRET_KEY});
 }
 
 std::string decodeAccesToken(
-    const std::string& token, 
-    const std::string& secret, 
+    std::string_view token, 
+    std::string_view secret, 
     drogon::orm::DbClientPtr clientPtr)
 {
 
     auto verifier = jwt::verify()
-						.allow_algorithm(jwt::algorithm::hs256{secret})
+						.allow_algorithm(jwt::algorithm::hs256{secret.data()})
 						.with_issuer("auth0");
-    auto decoded = jwt::decode(token);
+    auto decoded = jwt::decode(token.data());
 
 	try 
     {
@@ -135,3 +148,5 @@ std::string decodeAccesToken(
 
     return pl.at("email").get<std::string>();
 }
+
+
