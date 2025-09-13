@@ -2,14 +2,14 @@ import { AddUserEx, ListEx } from "./components";
 import { deleteUserEx } from "./utils";
 import { useCookies } from "react-cookie";
 import { UserDataContext } from "../app/appContext";
-import { useContext } from "react";
+import { useContext, useCallback } from "react";
 import { StyledCustomEx } from "./styles";
 
 const Exercise = ({onChange}) => {
     const [ cookies, removeCookie ] = useCookies();
     const userExs = useContext(UserDataContext);
 
-    const onDelete = async(id) => {
+    const onDelete = useCallback(async(id) => {
         try
         {   
             if (cookies.access_token)
@@ -26,7 +26,7 @@ const Exercise = ({onChange}) => {
         {
             console.error(error);
         }
-    };
+    }, [userExs]);
 
     return (
         <StyledCustomEx className="area"> 

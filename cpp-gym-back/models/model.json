@@ -1,0 +1,63 @@
+{
+    //rdbms: server type, postgresql,mysql or sqlite3
+    "rdbms": "postgresql",
+    //filename: sqlite3 db file name
+    //"filename":"",
+    //host: server address,localhost by default;
+    "host": "127.0.0.1",
+    //port: server port, 5432 by default;
+    "port": 5432,
+    //dbname: Database name;
+    "dbname": "cpp_gymdb",
+    //schema: valid for postgreSQL, "public" by default;
+    "schema": "public",
+    //user: User name
+    "user": "postgres",
+    //password or passwd: Password
+    "password": "",
+    //client_encoding: The character set used by drogon_ctl. it is empty string by default which 
+    //means use the default character set.
+    //"client_encoding": "",
+    //table: An array of tables to be modelized. if the array is empty, all revealed tables are modelized.
+    "tables": ["gym_user", "endurance", "strength", "user_exercise", "workout", "load"],
+    "relationships": {
+        "enabled": true,
+        "items": [
+            {
+                "type": "has many",
+                "original_table_name": "gym_user",
+                "original_table_alias": "gym_user",
+                "original_key": "id",
+                "target_table_name": "user_exercise",
+                "target_table_alias": "exercise",
+                "target_key": "user_id",
+                "enable_reverse": true
+            },
+            {
+                "type": "many to many",
+                "original_table_name": "gym_user",
+                "original_table_alias": "workout_gym_user",
+                "original_key": "id",
+                "pivot_table": {
+                    "table_name": "workout",
+                    "original_key": "user_id",
+                    "target_key": "exercise"
+                },
+                "target_table_name": "user_exercise",
+                "target_table_alias": "workout_exercise",
+                "target_key": "id",
+                "enable_reverse": true
+            },
+            {
+                "type": "has many",
+                "original_table_name": "workout",
+                "original_table_alias": "workout",
+                "original_key": "id",
+                "target_table_name": "load",
+                "target_table_alias": "load",
+                "target_key": "workout",
+                "enable_reverse": true
+            }
+        ]
+    }
+}
