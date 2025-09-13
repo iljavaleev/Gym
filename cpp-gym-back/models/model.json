@@ -36,7 +36,7 @@
             {
                 "type": "many to many",
                 "original_table_name": "gym_user",
-                "original_table_alias": "gym_user",
+                "original_table_alias": "workout_gym_user",
                 "original_key": "id",
                 "pivot_table": {
                     "table_name": "workout",
@@ -44,7 +44,7 @@
                     "target_key": "exercise"
                 },
                 "target_table_name": "user_exercise",
-                "target_table_alias": "exercise",
+                "target_table_alias": "workout_exercise",
                 "target_key": "id",
                 "enable_reverse": true
             },

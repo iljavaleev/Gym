@@ -678,7 +678,7 @@ void GymUser::getExercise(const DbClientPtr &clientPtr,
                }
                >> ecb;
 }
-std::vector<std::pair<UserExercise,Workout>> GymUser::getExercise(const DbClientPtr &clientPtr) const {
+std::vector<std::pair<UserExercise,Workout>> GymUser::getWorkout_exercise(const DbClientPtr &clientPtr) const {
     static const std::string sql = "select * from user_exercise,workout where workout.user_id = $1 and workout.exercise = user_exercise.id";
     Result r(nullptr);
     {
@@ -697,9 +697,9 @@ std::vector<std::pair<UserExercise,Workout>> GymUser::getExercise(const DbClient
     return ret;
 }
 
-void GymUser::getExercise(const DbClientPtr &clientPtr,
-                          const std::function<void(std::vector<std::pair<UserExercise,Workout>>)> &rcb,
-                          const ExceptionCallback &ecb) const
+void GymUser::getWorkout_exercise(const DbClientPtr &clientPtr,
+                                  const std::function<void(std::vector<std::pair<UserExercise,Workout>>)> &rcb,
+                                  const ExceptionCallback &ecb) const
 {
     static const std::string sql = "select * from user_exercise,workout where workout.user_id = $1 and workout.exercise = user_exercise.id";
     *clientPtr << sql

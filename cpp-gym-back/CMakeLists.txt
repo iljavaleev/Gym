@@ -30,9 +30,16 @@ add_executable(${PROJECT_NAME} main.cc)
 # and comment out the following lines
 find_package(Drogon CONFIG REQUIRED)
 find_package(nlohmann_json 3.12.0 REQUIRED)
+find_package(jwt-cpp CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
+add_subdirectory(third_party/Bcrypt.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon 
-                                    nlohmann_json::nlohmann_json)
+                                    nlohmann_json::nlohmann_json
+                                    jwt-cpp::jwt-cpp
+                                    spdlog::spdlog
+                                    bcrypt)
 
 # ##############################################################################
 
@@ -61,7 +68,8 @@ drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
 
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                                   ${CMAKE_CURRENT_SOURCE_DIR}/models)
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/models
+                                   ${CMAKE_CURRENT_SOURCE_DIR}/third_party/Bcrypt.cpp)
 target_sources(${PROJECT_NAME}
                PRIVATE
                ${SRC_DIR}

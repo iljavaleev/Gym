@@ -138,10 +138,10 @@ class GymUser
     void getExercise(const drogon::orm::DbClientPtr &clientPtr,
                      const std::function<void(std::vector<UserExercise>)> &rcb,
                      const drogon::orm::ExceptionCallback &ecb) const;
-    std::vector<std::pair<UserExercise,Workout>> getExercise(const drogon::orm::DbClientPtr &clientPtr) const;
-    void getExercise(const drogon::orm::DbClientPtr &clientPtr,
-                     const std::function<void(std::vector<std::pair<UserExercise,Workout>>)> &rcb,
-                     const drogon::orm::ExceptionCallback &ecb) const;
+    std::vector<std::pair<UserExercise,Workout>> getWorkout_exercise(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getWorkout_exercise(const drogon::orm::DbClientPtr &clientPtr,
+                             const std::function<void(std::vector<std::pair<UserExercise,Workout>>)> &rcb,
+                             const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<GymUser>;
     friend drogon::orm::BaseBuilder<GymUser, true, true>;
