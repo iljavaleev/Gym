@@ -19,9 +19,9 @@ bool validateEmail(std::string_view email)
    return std::regex_match(email.begin(), email.end(), pattern);
 }
 
-bool validatePassword(std::string_view)
+bool validatePassword(std::string_view password)
 {
-    return password.length() && password.length() > 6;
+    return password.length() && password.length() >= 6;
 }
 
 bool verifyPassword(std::string_view password, std::string_view hash)
@@ -63,20 +63,23 @@ std::shared_ptr<GymUser> getUser(std::string_view email,
 {
     
     if (not validateEmail(email))
+    {
         return nullptr;
+    }
     Mapper<GymUser> mp(clientPtr);
     try
     {
         auto res_future = mp.findFutureOne(Criteria(GymUser::Cols::_email, 
             CompareOperator::EQ, email));
-        return std::make_shared<GymUser>(res_future.get());
+        return std::make_shared<GymUser>(std::move(res_future.get()));
     }
     catch(const std::exception& e)
     {
+
         LOGGER->error(e.what());
         return nullptr;
     }
-    
+
     return nullptr;
 }
    
@@ -101,14 +104,14 @@ std::shared_ptr<GymUser> authenticateUser(std::string_view email,
     return nullptr;
 }
 
-std::string createAccessToken(Json::Value& data)
+std::string createAccessToken(const Json::Value& data)
 {
     using namespace std::chrono;
-    auto exp = std::chrono::seconds{ACCESS_TOKEN_EXPIRE_MINUTES * 60};
+    
     auto token = jwt::create()
                 .set_type("JWS")
                 .set_issuer("auth0")
-                .set_expires_in(exp);
+                .set_expires_in(std::chrono::seconds{ACCESS_TOKEN_EXPIRE_MINUTES * 60});
 
     for (const auto& elem: data.getMemberNames())
     {
@@ -116,7 +119,6 @@ std::string createAccessToken(Json::Value& data)
             jwt::claim(data[elem].asString())); 
     }
    
-    token = token.set_payload_claim("exp", jwt::claim(std::to_string(exp.count()))); 
     return token.sign(jwt::algorithm::hs256{SECRET_KEY});
 }
 
@@ -137,16 +139,34 @@ std::string decodeAccesToken(
 	} 
     catch (const std::exception& ex) 
     { 
-        LOGGER->error("Varification failed");
+        LOGGER->error(ex.what());
         return {};
     }
     auto pl = decoded.get_payload_json();
-    if (!pl.contains("email"))
+    if (!pl.contains("sub"))
     {
+        LOG_DEBUG << "not email";
         return {};
     }
 
-    return pl.at("email").get<std::string>();
+    return pl.at("sub").get<std::string>();
 }
 
+
+std::unique_ptr<Json::Value> stringToJson(std::string_view json_string)
+{
+    if (json_string.empty())
+        return nullptr;
+        
+    Json::Value res;
+    Json::CharReaderBuilder readerBuilder;
+
+    const std::unique_ptr<Json::CharReader> reader(readerBuilder.newCharReader());
+    
+    if (!reader->parse(json_string.data(), 
+        json_string.data() + json_string.size(), &res, nullptr))
+        return nullptr;
+    
+    return std::make_unique<Json::Value>(std::move(res));
+} 
 

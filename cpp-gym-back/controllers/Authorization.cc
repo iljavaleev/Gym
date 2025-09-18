@@ -1,13 +1,11 @@
 #include "Authorization.h"
-
 #include "utils/utils.hpp"
-
 #include "models/GymUser.h"
-
 #include "bcrypt.h"
 
 #include <iostream>
 #include <memory>
+#include <drogon/drogon.h>
 
 
 using drogon::orm::Criteria;
@@ -16,96 +14,93 @@ using drogon::orm::Mapper;
 
 using drogon_model::cpp_gymdb::GymUser;
 
-void Authorization::registration(const HttpRequestPtr &req,
-                 std::function<void (const HttpResponsePtr &)> &&callback) const
+
+std::unique_ptr<Authorization::form_data> Authorization::getFormData(const HttpRequestPtr &req,
+      std::function<void (const HttpResponsePtr &)> &&callback) const
 {
-    std::shared_ptr<Json::Value> juser = req->jsonObject();
-    Json::Value ret;
-    
-    if (!juser)
+    drogon::MultiPartParser parser;
+    if (parser.parse(req))
     {
-        sendBadRequest(callback, "Data error");
-        return;
+        sendBadRequest(callback, "Invalid form data");
+        return nullptr;
     }
+        
+    auto parameters = parser.getParameters();
+   
+    if (not parameters.contains("username") || 
+        not validateEmail(parameters.at("username")) || 
+        not parameters.contains("password") ||
+        not validatePassword(parameters.at("password"))
+    )
+    {
+        sendBadRequest(callback, "Invalid form data");
+        return nullptr;
+    }
+        
+    return std::make_unique<form_data>(
+        parameters.at("username"), parameters.at("password"));
+}  
 
-    if (!(validateEmail((*juser)["email"].asString()) &&   
-                validatePassword((*juser)["password"].asString()))) 
-    {
-        sendBadRequest(callback, "Validation error");
-        return;
-    }
-    
-    auto user = getUser((*juser)["emal"].asString());
-    
-    if (user)
-    {
-        sendBadRequest(callback, "User with this username or email already exist");
-        return;
-    }
-    
-    std::string hash_passw = bcrypt::generateHash((*juser)["password"].asString());
 
-    juser->removeMember("password");
-    (*juser)["hashed_password"] = std::move(hash_passw);
-    
-    
-    auto maybe_user = addUser(GymUser(*juser));
+void Authorization::sendToken(std::string_view email, int32_t id, 
+      std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    Json::Value data;
+    data["sub"] = email.data();
+    data["user_id"] = id;
 
-    if (not maybe_user)
-    {
-        LOG_ERROR << "Error while creating user";
-        sendBadRequest(callback, "Error while creating user");
-        return;
-    }
-    
-    juser->removeMember("hashed_password");
-    ret["message"] = "User created";
-    ret["user"] = *juser;
-    
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
+    std::string accessToken = createAccessToken(data);
+
+    data.clear();
+    data["access_token"] = std::move(accessToken);
+    data["token_type"] = "bearer";
+
+
+    auto resp=HttpResponse::newHttpJsonResponse(data);
     resp->setStatusCode(drogon::HttpStatusCode::k201Created);
     callback(resp);
 }
+  
 
+void Authorization::registration(const HttpRequestPtr &req,
+                 std::function<void (const HttpResponsePtr &)> &&callback) const
+{
+    std::function<void (const HttpResponsePtr &)> cbk{callback};
+    std::unique_ptr<form_data> params = getFormData(req, std::move(cbk));
+    if (not params)
+        return;
+
+    if (getUser(params->email))
+        sendBadRequest(callback, "User with this email already exists", 
+            drogon::HttpStatusCode::k401Unauthorized);
+    
+    
+    std::shared_ptr<GymUser> user = addUser(params->email, 
+        params->password);
+    
+    if (!user)
+    {
+        sendBadRequest(callback, "Database error", 
+            drogon::HttpStatusCode::k500InternalServerError);
+    }
+    
+    sendToken(params->email, user->getValueOfId(), std::move(callback));
+}
 
 
 void Authorization::login(const HttpRequestPtr &req,
                  std::function<void (const HttpResponsePtr &)> &&callback) const
 {
-    
-    std::shared_ptr<Json::Value> credentials = req->getJsonObject();
-    if (!credentials)
-    {
-        sendBadRequest(callback, "You must provide username and password in json format");
-        return;
-    }
-    
-    if (not (credentials->isMember("username") && 
-        credentials->isMember("password")))    
-    {
-        sendBadRequest(callback, "You must provide username and password");
-        return;
-    }
-    
-    auto m_user = getUser((*credentials)["username"].asString());
+    std::function<void (const HttpResponsePtr &)> cbk{callback};
+    std::unique_ptr<form_data> params = getFormData(req, std::move(cbk));
 
-    if (not m_user || not verifyPassword(
-        (*credentials)["password"].asString(), *m_user->getHashedPassword()))
+    std::shared_ptr<GymUser> user = authenticateUser(params->email, 
+        params->password);
+    if(not user)
     {
-        sendBadRequest(callback, 
-            "Incorrect username or password", 
+         sendBadRequest(callback, "Incorrect email or password", 
             drogon::HttpStatusCode::k401Unauthorized);
-        return;
     }
-    
-    Json::Value data;
-    data["username"] = *m_user->getUsername();
-    std::string token = createAccessToken(data);
-    
-    Json::Value ret;
-    ret["access_token"] = std::move(token);
-    ret["token_type"] = "bearer";
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(drogon::HttpStatusCode::k201Created);
-    callback(resp);
+
+    sendToken(params->email, user->getValueOfId(), std::move(callback));
 }

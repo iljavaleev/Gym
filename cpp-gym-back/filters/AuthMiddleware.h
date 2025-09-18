@@ -14,6 +14,6 @@ public:
                 MiddlewareNextCallback &&nextCb,
                 MiddlewareCallback &&mcb) override;
                 
-    std::string get_token(const HttpRequestPtr&);
+    std::string getToken(const HttpRequestPtr&);
 };
 

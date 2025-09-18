@@ -15,49 +15,51 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
             MiddlewareNextCallback &&nextCb,
             MiddlewareCallback &&mcb)
 {
-    std::string token = get_token(req);
+    
+    std::string token = getToken(req);
     if (not token.size())
     {
         mcb(HttpResponse::newNotFoundResponse(req));
+        LOG_DEBUG << "token not found";
         return;
     }
     
     std::string email = decodeAccesToken(token);
-    std::shared_ptr<GymUser> user{nullptr};
-
+    std::shared_ptr<GymUser> user;
+    if (not email.length())
+    {
+        mcb(HttpResponse::newNotFoundResponse(req));
+        LOG_DEBUG << "email not found";
+        return;
+    }
+    
     if (email.length())
         user = getUser(std::move(email));
 
     if (!user)
     {
         mcb(HttpResponse::newNotFoundResponse(req));
+        LOG_DEBUG << "user not found. ";
         return;
     }
-    // drogon::MultiPartParser parser;
-   
-    // auto json_value = req->getJsonObject();
-    // if (json_value)
-    // {
-    //     (*json_value)["user"] = (*user).toJson();
-    // }
-    // else
-    // {
-    //     Json::Value val;
-    //     val["user"] = (*user).toJson();
-    //     req->setContentTypeString("application/json");
-    //     req->setBody(val.toStyledString());
-    // }
-    
-    nextCb([&, mcb = std::move(mcb)](const HttpResponsePtr &resp) 
-        {   
-            resp->setBody((*user).toJson().toStyledString());
-            mcb(resp); 
-        }
-    );
+    std::string_view body = req->getBody();
+    std::unique_ptr<Json::Value> jsonBody = stringToJson(body);
+    Json::Value res;
+    if (jsonBody)
+    {
+        res = jsonBody.get();
+    }
+    res["user"] = (*user).toJson();
+    req->setBody(res.toStyledString());
+
+    nextCb([mcb = std::move(mcb)](const HttpResponsePtr &resp) 
+    {
+            mcb(resp);
+    });
 }
 
 
-std::string AuthMiddleware::get_token(const HttpRequestPtr &req)
+std::string AuthMiddleware::getToken(const HttpRequestPtr &req)
 {
     std::string token;
     token = req->getHeader("Authorization");

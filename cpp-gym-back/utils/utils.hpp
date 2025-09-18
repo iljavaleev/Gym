@@ -29,15 +29,15 @@ bool validatePassword(std::string_view);
 std::string getPasswordHash(std::string_view);
 
 std::shared_ptr<GymUser> addUser(std::string_view, std::string_view, 
-    drogon::orm::DbClientPtr);
+    drogon::orm::DbClientPtr = drogon::app().getDbClient());
 
 std::shared_ptr<GymUser> getUser(std::string_view, 
     drogon::orm::DbClientPtr = drogon::app().getDbClient());
     
 std::shared_ptr<GymUser> authenticateUser(std::string_view, std::string_view, 
-    drogon::orm::DbClientPtr);
+    drogon::orm::DbClientPtr = drogon::app().getDbClient());
 
-std::string createAccessToken(Json::Value&);
+std::string createAccessToken(const Json::Value&);
 
 std::string decodeAccesToken(std::string_view token, std::string_view secret = SECRET_KEY, 
     drogon::orm::DbClientPtr = drogon::app().getDbClient());
@@ -55,4 +55,5 @@ void sendBadRequest(F&& callback, std::string&& message,
     callback(resp);
 }
 
+std::unique_ptr<Json::Value> stringToJson(std::string_view json_string);
 #endif
