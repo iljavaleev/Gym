@@ -19,18 +19,19 @@ class Exercise : public drogon::HttpController<Exercise>
 
   public:
     METHOD_LIST_BEGIN
-      ADD_METHOD_TO(Exercise::getExercise, "/api/v1/user-exercise", Get, "AuthMiddleware"); 
-      ADD_METHOD_TO(Exercise::postExercise, "/api/v1/user-exercise", Post, "AuthMiddleware"); 
-      ADD_METHOD_TO(Exercise::deleteExercise, "/api/v1/user-exercise", Delete, "AuthMiddleware"); 
+      ADD_METHOD_TO(Exercise::getExercise, "/api/v1/user-exercise", Get, 
+        "AuthMiddleware"); 
+      ADD_METHOD_TO(Exercise::postExercise, "/api/v1/user-exercise", Post, 
+        "AuthMiddleware"); 
+      ADD_METHOD_TO(Exercise::deleteExercise, "/api/v1/user-exercise", Delete, 
+        "AuthMiddleware"); 
     METHOD_LIST_END
 
   void getExercise(const HttpRequestPtr &req,
             std::function<void (const HttpResponsePtr &)> &&callback) const;
 
-
   void postExercise(const HttpRequestPtr &req,
                 std::function<void (const HttpResponsePtr &)> &&callback) const;
-  
   
   void deleteExercise(const HttpRequestPtr &req,
                 std::function<void (const HttpResponsePtr &)> &&callback) const;  

@@ -18,12 +18,12 @@ const std::string Strength::Cols::_exercise = "\"exercise\"";
 const std::string Strength::Cols::_reps = "\"reps\"";
 const std::string Strength::Cols::_work_id = "\"work_id\"";
 const std::string Strength::Cols::_week_id = "\"week_id\"";
-const std::string Strength::primaryKeyName = "";
-const bool Strength::hasPrimaryKey = false;
+const std::string Strength::primaryKeyName = "id";
+const bool Strength::hasPrimaryKey = true;
 const std::string Strength::tableName = "\"strength\"";
 
 const std::vector<typename Strength::MetaData> Strength::metaData_={
-{"id","int32_t","integer",4,1,0,1},
+{"id","int32_t","integer",4,1,1,1},
 {"exercise","std::string","text",0,0,0,0},
 {"reps","std::string","character varying",32,0,0,0},
 {"work_id","int32_t","integer",4,0,0,1},
@@ -297,6 +297,11 @@ void Strength::setId(const int32_t &pId) noexcept
 {
     id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[0] = true;
+}
+const typename Strength::PrimaryKeyType & Strength::getPrimaryKey() const
+{
+    assert(id_);
+    return *id_;
 }
 
 const std::string &Strength::getValueOfExercise() const noexcept
@@ -791,6 +796,11 @@ bool Strength::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(0, "id", pJson["id"], err, false))
             return false;
     }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
     if(pJson.isMember("exercise"))
     {
         if(!validJsonOfField(1, "exercise", pJson["exercise"], err, false))
@@ -828,6 +838,11 @@ bool Strength::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
           if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
               return false;
       }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
       if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
       {
           if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
@@ -873,11 +888,6 @@ bool Strength::validJsonOfField(size_t index,
             if(isForCreation)
             {
                 err="The automatic primary key cannot be set";
-                return false;
-            }
-            else
-            {
-                err="The automatic primary key cannot be update";
                 return false;
             }
             if(!pJson.isInt())

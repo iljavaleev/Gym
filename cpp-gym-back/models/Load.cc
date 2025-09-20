@@ -19,12 +19,12 @@ const std::string Load::Cols::_workout = "\"workout\"";
 const std::string Load::Cols::_reps = "\"reps\"";
 const std::string Load::Cols::_expect = "\"expect\"";
 const std::string Load::Cols::_fact = "\"fact\"";
-const std::string Load::primaryKeyName = "";
-const bool Load::hasPrimaryKey = false;
+const std::string Load::primaryKeyName = "id";
+const bool Load::hasPrimaryKey = true;
 const std::string Load::tableName = "\"load\"";
 
 const std::vector<typename Load::MetaData> Load::metaData_={
-{"id","int32_t","integer",4,1,0,1},
+{"id","int32_t","integer",4,1,1,1},
 {"workout","std::string","uuid",0,0,0,0},
 {"reps","int32_t","integer",4,0,0,1},
 {"expect","int32_t","integer",4,0,0,0},
@@ -298,6 +298,11 @@ void Load::setId(const int32_t &pId) noexcept
 {
     id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[0] = true;
+}
+const typename Load::PrimaryKeyType & Load::getPrimaryKey() const
+{
+    assert(id_);
+    return *id_;
 }
 
 const std::string &Load::getValueOfWorkout() const noexcept
@@ -782,6 +787,11 @@ bool Load::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(0, "id", pJson["id"], err, false))
             return false;
     }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
     if(pJson.isMember("workout"))
     {
         if(!validJsonOfField(1, "workout", pJson["workout"], err, false))
@@ -819,6 +829,11 @@ bool Load::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
           if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
               return false;
       }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
       if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
       {
           if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
@@ -864,11 +879,6 @@ bool Load::validJsonOfField(size_t index,
             if(isForCreation)
             {
                 err="The automatic primary key cannot be set";
-                return false;
-            }
-            else
-            {
-                err="The automatic primary key cannot be update";
                 return false;
             }
             if(!pJson.isInt())

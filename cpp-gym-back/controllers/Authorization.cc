@@ -15,8 +15,9 @@ using drogon::orm::Mapper;
 using drogon_model::cpp_gymdb::GymUser;
 
 
-std::unique_ptr<Authorization::form_data> Authorization::getFormData(const HttpRequestPtr &req,
-      std::function<void (const HttpResponsePtr &)> &&callback) const
+std::unique_ptr<Authorization::form_data> Authorization::getFormData(
+    const HttpRequestPtr &req, std::function<void (const HttpResponsePtr &)> 
+        &&callback) const
 {
     drogon::MultiPartParser parser;
     if (parser.parse(req))

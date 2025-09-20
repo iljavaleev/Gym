@@ -18,12 +18,12 @@ using namespace drogon_model::cpp_gymdb;
 const std::string UserExercise::Cols::_id = "\"id\"";
 const std::string UserExercise::Cols::_user_id = "\"user_id\"";
 const std::string UserExercise::Cols::_title = "\"title\"";
-const std::string UserExercise::primaryKeyName = "";
-const bool UserExercise::hasPrimaryKey = false;
+const std::string UserExercise::primaryKeyName = "id";
+const bool UserExercise::hasPrimaryKey = true;
 const std::string UserExercise::tableName = "\"user_exercise\"";
 
 const std::vector<typename UserExercise::MetaData> UserExercise::metaData_={
-{"id","int32_t","integer",4,1,0,1},
+{"id","int32_t","integer",4,1,1,1},
 {"user_id","int32_t","integer",4,0,0,0},
 {"title","std::string","text",0,0,0,1}
 };
@@ -213,6 +213,11 @@ void UserExercise::setId(const int32_t &pId) noexcept
 {
     id_ = std::make_shared<int32_t>(pId);
     dirtyFlag_[0] = true;
+}
+const typename UserExercise::PrimaryKeyType & UserExercise::getPrimaryKey() const
+{
+    assert(id_);
+    return *id_;
 }
 
 const int32_t &UserExercise::getValueOfUserId() const noexcept
@@ -519,6 +524,11 @@ bool UserExercise::validateJsonForUpdate(const Json::Value &pJson, std::string &
         if(!validJsonOfField(0, "id", pJson["id"], err, false))
             return false;
     }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
     if(pJson.isMember("user_id"))
     {
         if(!validJsonOfField(1, "user_id", pJson["user_id"], err, false))
@@ -546,6 +556,11 @@ bool UserExercise::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
           if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
               return false;
       }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
       if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
       {
           if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
@@ -581,11 +596,6 @@ bool UserExercise::validJsonOfField(size_t index,
             if(isForCreation)
             {
                 err="The automatic primary key cannot be set";
-                return false;
-            }
-            else
-            {
-                err="The automatic primary key cannot be update";
                 return false;
             }
             if(!pJson.isInt())

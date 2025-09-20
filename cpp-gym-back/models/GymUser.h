@@ -55,8 +55,8 @@ class GymUser
     static const std::string tableName;
     static const bool hasPrimaryKey;
     static const std::string primaryKeyName;
-    using PrimaryKeyType = void;
-    int getPrimaryKey() const { assert(false); return 0; }
+    using PrimaryKeyType = int32_t;
+    const PrimaryKeyType &getPrimaryKey() const;
 
     /**
      * @brief constructor
@@ -175,13 +175,13 @@ class GymUser
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="";
+        static const std::string sql="select * from " + tableName + " where id = $1";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="";
+        static const std::string sql="delete from " + tableName + " where id = $1";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -201,6 +201,7 @@ class GymUser
             sql += "hashed_password,";
             ++parametersCount;
         }
+        needSelection=true;
         if(parametersCount > 0)
         {
             sql[sql.length()-1]=')';

@@ -1,6 +1,12 @@
-!/bin/bash
-# psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || psql -U  ${DB_USER}  -c "CREATE DATABASE ${DB_NAME}"
-# psql -U postgres -d ${DB_NAME} -a -f ./db_setup.sql
+#!/bin/bash
+
+
+CURRENT_DIR="$(pwd)/../setup/"
+echo "The script is running in: $CURRENT_DIR"
+source "$CURRENT_DIR/export.sh"
+
+psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || psql -U  ${DB_USER}  -c "CREATE DATABASE ${DB_NAME}"
+psql -U postgres -d ${DB_NAME} -a -f "$CURRENT_DIR/db_setup.sql"
 
 
 db_function(){
@@ -14,7 +20,7 @@ db_function(){
     done
 }
 
-db_function  "endurance" ./data/${ENDURANCE_FILE_PATH};
-db_function  "strength" ./data/${STRENGTH_FILE_PATH};
-db_function  "user_exercise" ./data/${EXS_FILE_PATH};
+db_function  "endurance" "$CURRENT_DIR/data/${ENDURANCE_FILE_PATH}";
+db_function  "strength" "$CURRENT_DIR/data/${STRENGTH_FILE_PATH}";
+db_function  "user_exercise" "$CURRENT_DIR/data/${EXS_FILE_PATH}";
      

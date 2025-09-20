@@ -16,7 +16,8 @@ std::unique_ptr<std::vector<UserExercise>> Exercise::getAll(size_t user_id,
     {
         auto res_future = mp.findFutureBy(Criteria(UserExercise::Cols::_user_id, 
             CompareOperator::EQ, user_id));
-        return std::make_unique<std::vector<UserExercise>>(std::move(res_future.get()));
+        return std::make_unique<std::vector<UserExercise>>(
+            std::move(res_future.get()));
     }
     catch(const std::exception& e)
     {
@@ -90,7 +91,8 @@ void Exercise::postExercise(const HttpRequestPtr &req,
         return;
     }
     
-    if (not jsonExr->isMember("exercise") || not (*jsonExr)["exercise"]["title"])
+    if (not jsonExr->isMember("exercise") || 
+        not (*jsonExr)["exercise"]["title"])
     {
         sendBadRequest(callback, "Data error", 
             drogon::HttpStatusCode::k400BadRequest);
@@ -160,7 +162,8 @@ void Exercise::deleteExercise(const HttpRequestPtr &req,
     }
 
 
-    if (not deleteOne((*jsonUser)["user"]["id"].asInt(), std::stoi(queryParams.at("id"))))
+    if (not deleteOne((*jsonUser)["user"]["id"].asInt(), 
+        std::stoi(queryParams.at("id"))))
     {
         sendBadRequest(callback, "Invalid id", 
             drogon::HttpStatusCode::k400BadRequest);

@@ -4,8 +4,25 @@
 #include "utils/utils.hpp"
 #include <spdlog/spdlog.h>
 
+// void startup() __attribute__((constructor));
+
+// void startup() 
+// {
+//     int result = system("../setup/db_entry.sh"); 
+
+//     if (result == 0) 
+//     {
+//         std::cout << "Command executed successfully." << std::endl;
+//     } 
+//     else 
+//     {
+//         exit(1);
+//     }
+// }
+
 int main() {
-    //Set HTTP listener address and port
+   
+    // startup();
     spdlog::set_default_logger(LOGGER);
     spdlog::default_logger()->set_level(spdlog::level::err);
     spdlog::default_logger()->flush_on(spdlog::level::err);
