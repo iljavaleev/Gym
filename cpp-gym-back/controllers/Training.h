@@ -11,7 +11,8 @@ class Training : public drogon::HttpController<Training>
   std::unique_ptr<Json::Value> getOne(size_t user_id, std::string_view date = "",
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
   
-  std::unique_ptr<Json::Value> addOne(size_t user_id, std::string_view date, 
+  int addAll(size_t user_id, std::string_view date, 
+    const Json::Value& training,
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
 
   int deleteOne(size_t user_id, std::string_view date, 

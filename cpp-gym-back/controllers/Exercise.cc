@@ -136,7 +136,7 @@ int Exercise::deleteOne(size_t user_id, size_t id,
     {
 
         LOGGER->error(e.what());
-        return {};
+        return -1;
     }
     return {};
 }
@@ -161,12 +161,20 @@ void Exercise::deleteExercise(const HttpRequestPtr &req,
         return;
     }
 
+    int delRes = deleteOne((*jsonUser)["user"]["id"].asInt(), 
+        std::stoi(queryParams.at("id")));
 
-    if (not deleteOne((*jsonUser)["user"]["id"].asInt(), 
-        std::stoi(queryParams.at("id"))))
+    if (not delRes)
     {
         sendBadRequest(callback, "Invalid id", 
             drogon::HttpStatusCode::k400BadRequest);
+        return;
+    }
+
+    if (delRes == -1)
+    {
+        sendBadRequest(callback, "DB error", 
+            drogon::HttpStatusCode::k500InternalServerError);
         return;
     }
 
