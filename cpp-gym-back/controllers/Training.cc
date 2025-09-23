@@ -2,6 +2,7 @@
 #include <format>
 #include "utils/utils.hpp"
 #include "models/Workout.h"
+#include "models/Load.h"
 
 using drogon_model::cpp_gymdb::Workout;
 using drogon_model::cpp_gymdb::Load;
@@ -102,7 +103,7 @@ int Training::addAll(size_t user_id,
 {
     Mapper<Workout> workMapper(clientPtr);
     Mapper<Load> loadMapper(clientPtr);
-   
+
     for (Json::ArrayIndex i = 0; i < training.size(); ++i) 
     {
         const Json::Value& element = training[i];
@@ -110,12 +111,13 @@ int Training::addAll(size_t user_id,
         w["id"] = drogon::utils::getUuid();
         w["count"] = element["count"];
         w["exercise"] = element["exercise"]["id"];
-        w["user_id"] = user_id;
+        w["user_id"] = static_cast<int>(user_id);
         w["date"] = date.data();
+        
         Workout tmpw(w);
         try
         {
-            workMapper.insert(std::move(tmpw));
+            workMapper.insert(tmpw);
         }
         catch(const std::exception& e)
         {
@@ -129,7 +131,7 @@ int Training::addAll(size_t user_id,
             Load tmpl(l);
             try
             {
-                loadMapper.insert(std::move(tmpl));
+                loadMapper.insert(tmpl);
             }
             catch(const std::exception& e)
             {
@@ -141,8 +143,6 @@ int Training::addAll(size_t user_id,
     return 0;
 } 
     
-
-
 
 
 int Training::deleteOne(size_t user_id, std::string_view date, 
@@ -237,9 +237,36 @@ void Training::postTraining(const HttpRequestPtr &req,
 }
 
     
-
 void Training::deleteTraining(const HttpRequestPtr &req,
             std::function<void (const HttpResponsePtr &)> &&callback) const
 {
+    std::unique_ptr<Json::Value> jsonUser = stringToJson(req->getBody());
+    if (not jsonUser)
+    {
+        sendBadRequest(callback, "Server error", 
+            drogon::HttpStatusCode::k500InternalServerError);
+        return;
+    }
 
+    auto params = req->getParameters();
+    if (not params.contains("date") || params.at("date").empty())
+    {
+        sendBadRequest(callback, "Error query params", 
+            drogon::HttpStatusCode::k400BadRequest);
+        return;
+    }
+
+    std::string_view training_date = params.at("date");
+    auto user_id = (*jsonUser)["user"]["id"].asInt();
+
+    if (deleteOne(user_id, training_date) == -1)
+    {
+        sendBadRequest(callback, "Server error", 
+            drogon::HttpStatusCode::k500InternalServerError);
+        return;
+    }
+    
+    auto resp=HttpResponse::newHttpJsonResponse(Json::Value());
+    resp->setStatusCode(drogon::HttpStatusCode::k200OK);
+    callback(resp);
 }

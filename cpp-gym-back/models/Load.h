@@ -34,6 +34,7 @@ class DbClient;
 using DbClientPtr = std::shared_ptr<DbClient>;
 }
 }
+
 namespace drogon_model
 {
 namespace cpp_gymdb
