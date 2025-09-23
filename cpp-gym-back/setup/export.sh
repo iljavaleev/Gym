@@ -1,0 +1,13 @@
+#!/bin/bash
+export DB_USER="postgres"
+export DB_PASSWORD="postgres"
+export DB_NAME="cpp_gymdb"
+export DB_PORT="5432"
+export POSTGRES_PASSWORD="postgres"
+export DB_HOST="localhost"
+export ENDURANCE_FILE_PATH="endurance.csv"
+export STRENGTH_FILE_PATH="strength.csv"
+export EXS_FILE_PATH="exs.csv"
+export SECRET_KEY="ce5992eeaf88d3ee4066e9bd0fb075905b8c248db9114872eb856bf7e29fb42a"
+export ALGORITHM="HS256"
+export ACCESS_TOKEN_EXPIRE_MINUTES="30"

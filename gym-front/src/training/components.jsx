@@ -139,7 +139,7 @@ const AutocompleteInput = ({ item, id, removeError, changed }) => {
             />
             
             {showSuggestions && (
-            <ul>
+            <ul className="scrollable-list">
                 {filtered.map((suggestion, index) => (
                 <li key={index} 
                     onClick={() => handleSuggestionClick(suggestion)}>
