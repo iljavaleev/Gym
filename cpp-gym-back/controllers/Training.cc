@@ -101,51 +101,59 @@ int Training::addAll(size_t user_id,
     std::string_view date, const Json::Value& training, 
     drogon::orm::DbClientPtr clientPtr) const
 {
-    Mapper<Workout> workMapper(clientPtr);
-    Mapper<Load> loadMapper(clientPtr);
-
+    int res = 0;
+    std::string uid;
+    auto transPtr = clientPtr->newTransaction();
+   
     for (Json::ArrayIndex i = 0; i < training.size(); ++i) 
     {
         const Json::Value& element = training[i];
-        Json::Value w;
-        w["id"] = drogon::utils::getUuid();
-        w["count"] = element["count"];
-        w["exercise"] = element["exercise"]["id"];
-        w["user_id"] = static_cast<int>(user_id);
-        w["date"] = date.data();
+        uid = drogon::utils::getUuid();
         
-        Workout tmpw(w);
+        auto w_fut = transPtr->execSqlAsyncFuture(
+            "INSERT INTO workout VALUES($1, $2, $3, $4, $5)", 
+            uid, element["count"].asInt(), static_cast<int>(user_id), 
+            element["exercise"]["id"].asInt(), date.data());
+        
         try
         {
-            workMapper.insert(tmpw);
+            w_fut.get();
         }
         catch(const std::exception& e)
         {
-            LOGGER->error(e.what());
-            return -1;
+            res = -1;
         }
         
-        for (Json::ArrayIndex j = 0; i < training["load"].size(); ++j)
+        
+        for (Json::ArrayIndex j = 0; j < element["load"].size(); ++j)
         {
-            const auto l = training["load"][j];
-            Load tmpl(l);
+            auto l = element["load"][j];
+            if (l["reps"].empty())
+                return -1;
+
+            auto l_fut = transPtr->execSqlAsyncFuture(
+                "INSERT INTO load(workout, reps, expect, fact) \
+                VALUES($1, $2, $3, $4)", uid, l["reps"].asInt(), 
+                (!l["expect"].empty() ? l["expect"].asInt() : 0), 
+                (!l["fact"].empty() ? l["fact"].asInt() : 0));
+            
             try
             {
-                loadMapper.insert(tmpl);
+                l_fut.get();
             }
             catch(const std::exception& e)
             {
-                LOGGER->error(e.what());
-                return -1;
+                res = -1;
             }
         }   
     }
-    return 0;
+   
+    return res;
 } 
     
 
 
-int Training::deleteOne(size_t user_id, std::string_view date, 
+int Training::deleteOne(int user_id, std::string_view date, 
     drogon::orm::DbClientPtr clientPtr) const
 {
     Mapper<Workout> mp(clientPtr);
@@ -216,17 +224,18 @@ void Training::postTraining(const HttpRequestPtr &req,
     }
 
     Json::Value training = (*body)["training"];
-    if (training.isArray() || not training.empty()) 
+    if (not training.isArray() || training.empty()) 
     {
         sendBadRequest(callback, "Server error", 
             drogon::HttpStatusCode::k400BadRequest);
         return;
     }
+    
     if (addAll(user_id, date, training) == -1)
-    {   
+    {
         LOGGER->error("DB error");
-        sendBadRequest(callback, "Server error", 
-            drogon::HttpStatusCode::k500InternalServerError);
+        sendBadRequest(callback, "Bad request", 
+            drogon::HttpStatusCode::k400BadRequest);
         return;
     }
 

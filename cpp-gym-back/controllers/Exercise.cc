@@ -15,7 +15,7 @@ std::unique_ptr<std::vector<UserExercise>> Exercise::getAll(size_t user_id,
     try
     {
         auto res_future = mp.findFutureBy(Criteria(UserExercise::Cols::_user_id, 
-            CompareOperator::EQ, user_id));
+            CompareOperator::EQ, static_cast<int>(user_id)));
         return std::make_unique<std::vector<UserExercise>>(
             std::move(res_future.get()));
     }

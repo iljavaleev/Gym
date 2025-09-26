@@ -44,13 +44,14 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
     }
     std::string_view body = req->getBody();
     std::unique_ptr<Json::Value> jsonBody = stringToJson(body);
-    Json::Value res;
+    
+    Json::Value* res;
     if (jsonBody)
     {
         res = jsonBody.get();
     }
-    res["user"] = (*user).toJson();
-    req->setBody(res.toStyledString());
+    (*res)["user"] = (*user).toJson();
+    req->setBody(res->toStyledString());
 
     nextCb([mcb = std::move(mcb)](const HttpResponsePtr &resp) 
     {

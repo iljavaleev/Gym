@@ -14,8 +14,8 @@ class Training : public drogon::HttpController<Training>
   int addAll(size_t user_id, std::string_view date, 
     const Json::Value& training,
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
-
-  int deleteOne(size_t user_id, std::string_view date, 
+    
+  int deleteOne(int user_id, std::string_view date, 
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
 
   public:

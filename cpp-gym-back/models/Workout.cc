@@ -28,7 +28,7 @@ const std::vector<typename Workout::MetaData> Workout::metaData_={
 {"count","int32_t","integer",4,0,0,1},
 {"user_id","int32_t","integer",4,0,0,0},
 {"exercise","int32_t","integer",4,0,0,0},
-{"date","::trantor::Date","date",0,0,0,1}
+{"date","::trantor::Date","timestamp without time zone",0,0,0,1}
 };
 const std::string &Workout::getColumnName(size_t index) noexcept(false)
 {
@@ -57,12 +57,25 @@ Workout::Workout(const Row &r, const ssize_t indexOffset) noexcept
         }
         if(!r["date"].isNull())
         {
-            auto daysStr = r["date"].as<std::string>();
+            auto timeStr = r["date"].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
-            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            date_=std::make_shared<::trantor::Date>(t*1000000);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                date_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
     else
@@ -97,12 +110,25 @@ Workout::Workout(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 4;
         if(!r[index].isNull())
         {
-            auto daysStr = r[index].as<std::string>();
+            auto timeStr = r[index].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
-            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            date_=std::make_shared<::trantor::Date>(t*1000000);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                date_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 
@@ -152,12 +178,25 @@ Workout::Workout(const Json::Value &pJson, const std::vector<std::string> &pMasq
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            auto daysStr = pJson[pMasqueradingVector[4]].asString();
+            auto timeStr = pJson[pMasqueradingVector[4]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
-            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            date_=std::make_shared<::trantor::Date>(t*1000000);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                date_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -201,12 +240,25 @@ Workout::Workout(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[4]=true;
         if(!pJson["date"].isNull())
         {
-            auto daysStr = pJson["date"].asString();
+            auto timeStr = pJson["date"].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
-            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            date_=std::make_shared<::trantor::Date>(t*1000000);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                date_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -255,12 +307,25 @@ void Workout::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            auto daysStr = pJson[pMasqueradingVector[4]].asString();
+            auto timeStr = pJson[pMasqueradingVector[4]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
-            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            date_=std::make_shared<::trantor::Date>(t*1000000);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                date_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -303,12 +368,25 @@ void Workout::updateByJson(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[4] = true;
         if(!pJson["date"].isNull())
         {
-            auto daysStr = pJson["date"].asString();
+            auto timeStr = pJson["date"].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
-            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            date_=std::make_shared<::trantor::Date>(t*1000000);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                date_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -414,7 +492,7 @@ const std::shared_ptr<::trantor::Date> &Workout::getDate() const noexcept
 }
 void Workout::setDate(const ::trantor::Date &pDate) noexcept
 {
-    date_ = std::make_shared<::trantor::Date>(pDate.roundDay());
+    date_ = std::make_shared<::trantor::Date>(pDate);
     dirtyFlag_[4] = true;
 }
 

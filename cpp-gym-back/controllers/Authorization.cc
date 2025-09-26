@@ -72,8 +72,12 @@ void Authorization::registration(const HttpRequestPtr &req,
         return;
 
     if (getUser(params->email))
+    {
         sendBadRequest(callback, "User with this email already exists", 
             drogon::HttpStatusCode::k401Unauthorized);
+        return;
+    }
+        
     
     
     std::shared_ptr<GymUser> user = addUser(params->email, 
@@ -83,6 +87,7 @@ void Authorization::registration(const HttpRequestPtr &req,
     {
         sendBadRequest(callback, "Database error", 
             drogon::HttpStatusCode::k500InternalServerError);
+        return;
     }
     
     sendToken(params->email, user->getValueOfId(), std::move(callback));
@@ -99,8 +104,9 @@ void Authorization::login(const HttpRequestPtr &req,
         params->password);
     if(not user)
     {
-         sendBadRequest(callback, "Incorrect email or password", 
+        sendBadRequest(callback, "Incorrect email or password", 
             drogon::HttpStatusCode::k401Unauthorized);
+        return;
     }
 
     sendToken(params->email, user->getValueOfId(), std::move(callback));
