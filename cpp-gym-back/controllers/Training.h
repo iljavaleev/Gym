@@ -8,7 +8,7 @@ using namespace drogon;
 
 class Training : public drogon::HttpController<Training>
 {
-  std::unique_ptr<Json::Value> getOne(size_t user_id, std::string_view date = "",
+  std::unique_ptr<Json::Value> getOne(size_t user_id, std::string_view date,
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
   
   int addAll(size_t user_id, std::string_view date, 

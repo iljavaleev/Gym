@@ -45,14 +45,13 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
     std::string_view body = req->getBody();
     std::unique_ptr<Json::Value> jsonBody = stringToJson(body);
     
-    Json::Value* res;
+    Json::Value res;
     if (jsonBody)
     {
-        res = jsonBody.get();
+        res = *jsonBody;
     }
-    (*res)["user"] = (*user).toJson();
-    req->setBody(res->toStyledString());
-
+    res["user"] = (*user).toJson();
+    req->setBody(res.toStyledString());
     nextCb([mcb = std::move(mcb)](const HttpResponsePtr &resp) 
     {
             mcb(resp);
@@ -85,6 +84,6 @@ std::string AuthMiddleware::getToken(const HttpRequestPtr &req)
     {
         return {};
     }
-
+    
     return {v.at(1).begin(), v.at(1).end()};
 }
