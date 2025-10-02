@@ -11,12 +11,21 @@ using drogon::orm::Criteria;
 using drogon::orm::CompareOperator;
 using drogon::orm::Mapper;
 
-constexpr std::string_view GETQUERY = "select w.date date, w.count count," 
-    " e.id id, e.title title, l.reps reps, l.expect expect, l.fact fact from"
-    " Workout w join Load l on w.id=l.workout join User_exercise e on" 
-    " e.id=w.exercise where w.date={} and w.user_id={} order by w.count, l.id";
+constexpr std::string_view GET_WITH_DATE_QUERY = 
+    "select w.date date, w.count count, e.id id, e.title title, l.reps reps, "
+    "l.expect expect, l.fact fact from Workout w "
+    "join Load l on w.id=l.workout "
+    "join User_exercise e on e.id=w.exercise "
+    "where w.date='{}'::timestamp and w.user_id={} order by w.count, l.id";
 
-constexpr std::string_view GETSUBQ = "(select w.date from Workout w where w.date>=\'{}\'::timestamp and w.user_id={} order by w.date limit 1)";
+constexpr std::string_view GET_WITHOUT_DATE_QUERY = 
+    "select w.date date, w.count count, e.id id, e.title title, l.reps reps, "
+    "l.expect expect, l.fact fact from Workout w "
+    "join Load l on w.id=l.workout "
+    "join User_exercise e on e.id=w.exercise "
+    "where w.date=(select w.date as date from Workout w "
+    "where w.date>='{}'::timestamp and w.user_id={} order by w.date limit 1) "
+    "and w.user_id={} order by w.count, l.id";
 
 
 std::unique_ptr<Json::Value> Training::getOne(size_t user_id, 
@@ -29,21 +38,20 @@ std::unique_ptr<Json::Value> Training::getOne(size_t user_id,
     if (not date.empty())
     {
         auto args = std::make_format_args(date, user_id);
-        query = std::vformat(GETQUERY, args);
+        query = std::vformat(GET_WITH_DATE_QUERY, args);
     }
     else
     {
-        auto date = trantor::Date::date().toCustomFormattedString("%Y-%m-%d %H:%M:%S");
-        auto args = std::make_format_args(date, user_id);
-        std::string subq = std::vformat(GETSUBQ, args);
-        args = std::make_format_args(subq, user_id);
-        query = std::vformat(GETQUERY, args);
+        auto date = trantor::Date::date().toCustomFormattedString("%Y-%m-%dT%H:%M:%S");
+        auto args = std::make_format_args(date, user_id, user_id);
+        query = std::vformat(GET_WITHOUT_DATE_QUERY, args);
     }
-    LOG_ERROR << query;
     auto res_future = clientPtr->execSqlAsyncFuture(query);
     try
     {
-        auto result = res_future.get();
+        drogon::orm::Result result = res_future.get();
+        if (result.empty())
+            return userTraining;
         
         auto first = result.begin();
         (*userTraining)["date"] = (*first)["date"].as<std::string>();
@@ -142,7 +150,6 @@ int Training::addAll(size_t user_id,
 } 
     
 
-
 int Training::deleteOne(int user_id, std::string_view date, 
     drogon::orm::DbClientPtr clientPtr) const
 {
@@ -186,7 +193,17 @@ void Training::getTraining(const HttpRequestPtr &req,
     std::unique_ptr<Json::Value> training = 
         getOne((*jsonUser)["user"]["id"].asInt(), training_date);
 
-    auto resp=HttpResponse::newHttpJsonResponse(*training);
+    Json::Value res;
+    if (training != nullptr)
+    {
+        res = *training;
+    }
+    else
+    {
+        res["data"] = training_date.empty() ? "" : training_date.data();
+        res["training"] = Json::Value(Json::arrayValue);
+    }
+    auto resp=HttpResponse::newHttpJsonResponse(std::move(res));
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     callback(resp);
 }

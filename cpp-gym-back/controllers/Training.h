@@ -21,7 +21,9 @@ class Training : public drogon::HttpController<Training>
   public:
     METHOD_LIST_BEGIN
       ADD_METHOD_TO(Training::getTraining, "/api/v1/user-training", Get, 
-        "AuthMiddleware"); 
+        "AuthMiddleware");
+      ADD_METHOD_TO(Training::getTraining, "/api/v1/user-next-training", Get, 
+        "AuthMiddleware");  
       ADD_METHOD_TO(Training::postTraining, "/api/v1/user-training", Post, 
         "AuthMiddleware"); 
       ADD_METHOD_TO(Training::deleteTraining, "/api/v1/user-training", Delete, 

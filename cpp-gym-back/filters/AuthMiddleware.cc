@@ -10,17 +10,14 @@
 using drogon_model::cpp_gymdb::GymUser;
 
 
-
 void AuthMiddleware::invoke(const HttpRequestPtr &req,
             MiddlewareNextCallback &&nextCb,
             MiddlewareCallback &&mcb)
 {
-    
     std::string token = getToken(req);
     if (not token.size())
     {
-        mcb(HttpResponse::newNotFoundResponse(req));
-        LOG_DEBUG << "token not found";
+        sendBadRequest(mcb, "Token not found error");
         return;
     }
     
@@ -28,8 +25,7 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
     std::shared_ptr<GymUser> user;
     if (not email.length())
     {
-        mcb(HttpResponse::newNotFoundResponse(req));
-        LOG_DEBUG << "email not found";
+        sendBadRequest(mcb, "Token error");
         return;
     }
     
@@ -38,8 +34,7 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
 
     if (!user)
     {
-        mcb(HttpResponse::newNotFoundResponse(req));
-        LOG_DEBUG << "user not found. ";
+        sendBadRequest(mcb, "User not found");
         return;
     }
     std::string_view body = req->getBody();

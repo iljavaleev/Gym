@@ -81,7 +81,8 @@ const Training = () => {
                     payload: result.data?.training 
                 }
             );
-            let [date, time] = result.data.date.split("T")
+            let [date, time] = result.data.date.includes("T") ? 
+                result.data.date.split("T") : result.data.date.split(" ");
             time = time.slice(0, 5);
             setTrainigDate({ ...trainingDate, date: date, time: time});
             localStorage.setItem("training", JSON.stringify(

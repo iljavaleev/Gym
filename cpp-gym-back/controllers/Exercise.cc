@@ -8,7 +8,7 @@ using drogon::orm::CompareOperator;
 using drogon::orm::Mapper;
 
 
-std::unique_ptr<std::vector<UserExercise>> Exercise::getAll(size_t user_id, 
+std::unique_ptr<std::vector<UserExercise>> Exercise::getAll(int user_id, 
     drogon::orm::DbClientPtr clientPtr) const
 {
     Mapper<UserExercise> mp(clientPtr);
@@ -29,7 +29,7 @@ std::unique_ptr<std::vector<UserExercise>> Exercise::getAll(size_t user_id,
 }
 
 
-std::unique_ptr<UserExercise> Exercise::addOne(size_t user_id, 
+std::unique_ptr<UserExercise> Exercise::addOne(int user_id, 
     std::string_view title, drogon::orm::DbClientPtr clientPtr) const
 {
     Mapper<UserExercise> mp(clientPtr);
@@ -91,8 +91,8 @@ void Exercise::postExercise(const HttpRequestPtr &req,
         return;
     }
     
-    if (not jsonExr->isMember("exercise") || 
-        not (*jsonExr)["exercise"]["title"])
+    if (not jsonExr->isMember("title") || 
+        not (*jsonExr)["title"])
     {
         sendBadRequest(callback, "Data error", 
             drogon::HttpStatusCode::k400BadRequest);
@@ -100,9 +100,9 @@ void Exercise::postExercise(const HttpRequestPtr &req,
     }
 
     std::unique_ptr<UserExercise> usex = addOne((*jsonExr)["user"]["id"].asInt(), 
-        (*jsonExr)["exercise"]["title"].asString());
+        (*jsonExr)["title"].asString());
     
-    if (not usex)
+    if (usex == nullptr)
     {
         sendBadRequest(callback, "DB error", 
             drogon::HttpStatusCode::k500InternalServerError);
@@ -110,7 +110,6 @@ void Exercise::postExercise(const HttpRequestPtr &req,
     }
     
     Json::Value data = usex->toJson();
-    data.removeMember("id");
 
     auto resp = HttpResponse::newHttpJsonResponse(data);
     resp->setStatusCode(drogon::HttpStatusCode::k201Created);
@@ -118,7 +117,7 @@ void Exercise::postExercise(const HttpRequestPtr &req,
 }
 
 
-int Exercise::deleteOne(size_t user_id, size_t id, 
+int Exercise::deleteOne(int user_id, int id, 
     drogon::orm::DbClientPtr clientPtr) const
 {
     Mapper<UserExercise> mp(clientPtr);
