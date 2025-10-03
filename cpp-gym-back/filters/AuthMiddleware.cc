@@ -45,7 +45,11 @@ void AuthMiddleware::invoke(const HttpRequestPtr &req,
     {
         res = *jsonBody;
     }
-    res["user"] = (*user).toJson();
+    
+    auto juser = (*user).toJson();
+    juser.removeMember("hashed_password");
+    res["user"] = std::move(juser);
+    
     req->setBody(res.toStyledString());
     nextCb([mcb = std::move(mcb)](const HttpResponsePtr &resp) 
     {

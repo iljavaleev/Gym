@@ -17,6 +17,7 @@ const getTrainingByDate = async (url=formatGetDelTrainigUrl(), token) => {
 
 
 const postTrainingByDate = async (payload, token) => {
+    console.log(payload);
     return await axios.post(
         POST_TRAINING_URL, 
         payload, 

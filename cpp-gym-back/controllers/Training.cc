@@ -3,6 +3,7 @@
 #include "utils/utils.hpp"
 #include "models/Workout.h"
 #include "models/Load.h"
+#include <sstream>
 
 using drogon_model::cpp_gymdb::Workout;
 using drogon_model::cpp_gymdb::Load;
@@ -28,7 +29,7 @@ constexpr std::string_view GET_WITHOUT_DATE_QUERY =
     "and w.user_id={} order by w.count, l.id";
 
 
-std::unique_ptr<Json::Value> Training::getOne(size_t user_id, 
+std::unique_ptr<Json::Value> Training::getOne(int user_id, 
     std::string_view date, drogon::orm::DbClientPtr clientPtr) const
 {
     std::unique_ptr<Json::Value> userTraining = std::make_unique<Json::Value>();
@@ -42,7 +43,7 @@ std::unique_ptr<Json::Value> Training::getOne(size_t user_id,
     }
     else
     {
-        auto date = trantor::Date::date().toCustomFormattedString("%Y-%m-%dT%H:%M:%S");
+        date = trantor::Date::date().toCustomFormattedString("%Y-%m-%dT%H:%M:%S");
         auto args = std::make_format_args(date, user_id, user_id);
         query = std::vformat(GET_WITHOUT_DATE_QUERY, args);
     }
@@ -51,7 +52,7 @@ std::unique_ptr<Json::Value> Training::getOne(size_t user_id,
     {
         drogon::orm::Result result = res_future.get();
         if (result.empty())
-            return userTraining;
+            return nullptr;
         
         auto first = result.begin();
         (*userTraining)["date"] = (*first)["date"].as<std::string>();
@@ -104,7 +105,7 @@ std::unique_ptr<Json::Value> Training::getOne(size_t user_id,
     return nullptr;
 }
 
-int Training::addAll(size_t user_id, 
+int Training::addAll(int user_id, 
     std::string_view date, const Json::Value& training, 
     drogon::orm::DbClientPtr clientPtr) const
 {
@@ -119,8 +120,8 @@ int Training::addAll(size_t user_id,
             
             auto w_fut = transPtr->execSqlAsyncFuture(
                 "INSERT INTO workout VALUES($1, $2, $3, $4, $5)", 
-                uid, element["count"].asInt(), static_cast<int>(user_id), 
-                element["exercise"]["id"].asInt(), date.data());
+                uid, element["count"].asString(), user_id, 
+                element["exercise"]["id"].asString(), date.data());
             
             w_fut.get();
 
@@ -132,9 +133,11 @@ int Training::addAll(size_t user_id,
 
                 auto l_fut = transPtr->execSqlAsyncFuture(
                     "INSERT INTO load(workout, reps, expect, fact) \
-                    VALUES($1, $2, $3, $4)", uid, l["reps"].asInt(), 
-                    (!l["expect"].empty() ? l["expect"].asInt() : 0), 
-                    (!l["fact"].empty() ? l["fact"].asInt() : 0));
+                    VALUES($1, $2, $3, $4)", uid, l["reps"].asString(), 
+                    (l["expect"].asString().length() ? 
+                        l["expect"].asString() : "0"), 
+                    (l["fact"].asString().length() ? 
+                        l["fact"].asString() : "0"));
                 
                 l_fut.get();
             }   
@@ -200,9 +203,10 @@ void Training::getTraining(const HttpRequestPtr &req,
     }
     else
     {
-        res["data"] = training_date.empty() ? "" : training_date.data();
+        res["date"] = training_date.empty() ? "" : training_date.data();
         res["training"] = Json::Value(Json::arrayValue);
     }
+
     auto resp=HttpResponse::newHttpJsonResponse(std::move(res));
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     callback(resp);

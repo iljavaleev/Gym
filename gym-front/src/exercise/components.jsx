@@ -33,7 +33,8 @@ const AddUserEx = ({ onDataChange }) => {
                 data.push({ id: result.data.id, title: result.data.title});
                 onDataChange([...data]);
                 setEx({ title:"", isError: false, isSuccess: true });
-                setTimeout(() => setEx({...ex, title:"", isSuccess: false}), 2000);
+                setTimeout(() => setEx(
+                    {...ex, title:"", isSuccess: false}), 2000);
             })();
         }
         catch (error)
@@ -84,9 +85,12 @@ const AddUserEx = ({ onDataChange }) => {
                     <div>Вы можете создать не более 20 своих упражнений</div>
                     <InputWithLabel cls="custom-title" value={ex.title} 
                         onInputChange={onChange} help="введите название"/>
-                    {data.length < 20 && <Button cls="comlete-button" onClick={onClick}>
-                        Создать
-                    </Button>}
+                    {
+                        data.length < 20 && 
+                            <Button cls="comlete-button" onClick={onClick}>
+                                Создать
+                            </Button>
+                    }
                     { ex.isError && <><br/><strong>{ex.errorMsg}</strong></> }
                     { ex.isSuccess && <><br/><strong>Успешно</strong></> }
                 </div>

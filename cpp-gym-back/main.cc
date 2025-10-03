@@ -87,8 +87,6 @@ void setupCors()
 
 int main() {
    
-    // startup();
-    
     spdlog::set_default_logger(LOGGER);
     spdlog::default_logger()->set_level(spdlog::level::err);
     spdlog::default_logger()->flush_on(spdlog::level::err);

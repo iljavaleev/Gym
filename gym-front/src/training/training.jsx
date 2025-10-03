@@ -68,10 +68,16 @@ const Training = () => {
         if (action === "next")
             url = getInitialQueryUrl();
         else
+        {
+            if (!trainingDate.date || !trainingDate.time)
+                return;
+           
             url = formatGetDelTrainigUrl(
                 `${trainingDate.date}T${trainingDate.time}`
             );
-
+            
+        }
+           
         try
         {
             const result = await getTrainingByDate(url, cookies.access_token);
@@ -81,6 +87,13 @@ const Training = () => {
                     payload: result.data?.training 
                 }
             );
+            
+            if (!result.data.date)
+            {
+                localStorage.removeItem("training");
+                return;
+            }
+                
             let [date, time] = result.data.date.includes("T") ? 
                 result.data.date.split("T") : result.data.date.split(" ");
             time = time.slice(0, 5);
