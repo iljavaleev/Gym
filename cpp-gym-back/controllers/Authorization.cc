@@ -20,9 +20,10 @@ std::unique_ptr<Authorization::form_data> Authorization::getFormData(
         &&callback) const
 {
     drogon::MultiPartParser parser;
+    
     if (parser.parse(req))
     {
-        sendBadRequest(callback, "Invalid form data");
+        LOG_DEBUG << "parse";
         return nullptr;
     }
         
@@ -34,7 +35,7 @@ std::unique_ptr<Authorization::form_data> Authorization::getFormData(
         not validatePassword(parameters.at("password"))
     )
     {
-        sendBadRequest(callback, "Invalid form data");
+        LOG_DEBUG << "params";
         return nullptr;
     }
         
@@ -68,12 +69,20 @@ void Authorization::registration(const HttpRequestPtr &req,
 {
     std::function<void (const HttpResponsePtr &)> cbk{callback};
     std::unique_ptr<form_data> params = getFormData(req, std::move(cbk));
-    if (not params)
+    if (params == nullptr)
+    {
+        sendBadRequest(callback, "Invalid form data");
         return;
+    }
+        
 
     if (getUser(params->email))
+    {
         sendBadRequest(callback, "User with this email already exists", 
             drogon::HttpStatusCode::k401Unauthorized);
+        return;
+    }
+        
     
     
     std::shared_ptr<GymUser> user = addUser(params->email, 
@@ -83,6 +92,7 @@ void Authorization::registration(const HttpRequestPtr &req,
     {
         sendBadRequest(callback, "Database error", 
             drogon::HttpStatusCode::k500InternalServerError);
+        return;
     }
     
     sendToken(params->email, user->getValueOfId(), std::move(callback));
@@ -94,14 +104,19 @@ void Authorization::login(const HttpRequestPtr &req,
 {
     std::function<void (const HttpResponsePtr &)> cbk{callback};
     std::unique_ptr<form_data> params = getFormData(req, std::move(cbk));
-
+    if (params == nullptr)
+    {
+        sendBadRequest(callback, "Invalid form data");
+        return;
+    }
     std::shared_ptr<GymUser> user = authenticateUser(params->email, 
         params->password);
     if(not user)
     {
-         sendBadRequest(callback, "Incorrect email or password", 
+        sendBadRequest(callback, "Incorrect email or password", 
             drogon::HttpStatusCode::k401Unauthorized);
+        return;
     }
-
+    
     sendToken(params->email, user->getValueOfId(), std::move(callback));
 }

@@ -8,13 +8,13 @@ using drogon_model::cpp_gymdb::UserExercise;
 
 class Exercise : public drogon::HttpController<Exercise>
 {
-  std::unique_ptr<std::vector<UserExercise>> getAll(size_t user_id, 
+  std::unique_ptr<std::vector<UserExercise>> getAll(int user_id, 
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
   
-  std::unique_ptr<UserExercise> addOne(size_t user_id, std::string_view title, 
+  std::unique_ptr<UserExercise> addOne(int user_id, std::string_view title, 
     drogon::orm::DbClientPtr clientPtr = drogon::app().getDbClient()) const;
 
-  int deleteOne(size_t user_id, size_t id, drogon::orm::DbClientPtr clientPtr = 
+  int deleteOne(int user_id, int id, drogon::orm::DbClientPtr clientPtr = 
       drogon::app().getDbClient()) const;
 
   public:

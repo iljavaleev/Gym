@@ -4,8 +4,9 @@ import { useState, useContext, useRef } from "react";
 import { UserDataContext } from "../app/appContext";
 import { useNavigate } from "react-router";
 
-const LABELS = [ "повторения", "ожидаемый результат", "фактический" ];
 
+const LABELS = { reps: "повторения", expect: "ожидаемый результат", 
+    fact: "фактический" };
 
 const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
     return (
@@ -21,7 +22,7 @@ const DateTimeForm = ({ searchTerm, onSubmit, onChangeDate, onChangeTime }) => {
                 </InputWithLabel>
                 <InputWithLabel id="training-time" 
                     value={searchTerm.time} onInputChange={onChangeTime} 
-                    type="time" step="1" isFocused>
+                    type="time" step="1800" isFocused min="06:00" max="21:00">
                 </InputWithLabel>
             </div>
             <br/> 
@@ -158,18 +159,23 @@ const ObjectToForm = ({obj, removeError, changed }) => {
         obj[event.target.className] = event.target.value;
         changed.current = true;
     }
-    let count = 0;
 
     return  (   
         <>
-            {Object.entries(obj).map(([k, v]) => 
-            (    
-                <span className="input" key={crypto.randomUUID()}>
-                    <input className={k} type="text" 
-                        placeholder={LABELS[count++]} defaultValue={v} 
+            {
+                <span className="input" >
+                    <input key={crypto.randomUUID()} className="reps" type="text" 
+                        placeholder={LABELS.reps} defaultValue={obj.reps} 
                         onChange={onChange} onMouseEnter={()=>removeError()}/>
-                </span>    
-            ))}
+                    <input key={crypto.randomUUID()} className="expect" type="text" 
+                        placeholder={LABELS.expect} defaultValue={obj.expect} 
+                        onChange={onChange} onMouseEnter={()=>removeError()}/>
+                    <input key={crypto.randomUUID()} className="fact" type="text" 
+                        placeholder={LABELS.fact} defaultValue={obj.fact} 
+                        onChange={onChange} onMouseEnter={()=>removeError()}/>
+                </span>
+                    
+            }
         </>
     )
 }

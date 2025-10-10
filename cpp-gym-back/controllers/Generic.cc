@@ -12,6 +12,7 @@ using drogon::orm::Criteria;
 using drogon::orm::CompareOperator;
 using drogon::orm::Mapper;
 
+
 template<typename T>
 std::unique_ptr<std::vector<T>> Generic::getWork(int number, 
     drogon::orm::DbClientPtr clientPtr) const
@@ -19,7 +20,7 @@ std::unique_ptr<std::vector<T>> Generic::getWork(int number,
     Mapper<T> mp(clientPtr);
     try
     {   
-        auto res_future = mp.findFutureBy(Criteria(T::Cols::_id, 
+        auto res_future = mp.findFutureBy(Criteria(T::Cols::_work_id, 
             CompareOperator::EQ, number));
         return std::make_unique<std::vector<T>>(std::move(res_future.get()));
     }
@@ -48,33 +49,38 @@ void Generic::seacrh(const HttpRequestPtr &req,
     int number = std::stoi(params.at("number"));
     Json::Value data(Json::arrayValue);
     
-    if (params.at("book") == "0")
+    if (params.at("book") == "1")
     {
         std::unique_ptr<std::vector<Endurance>> work = 
             getWork<Endurance>(number);
-        
+
         for (const auto& e: *work)
         { 
             Json::Value val;
+            
             val["exercise"] = e.getValueOfExercise();
-            val["reps"] = e.getValueOfReps();
-            val["superset"] = e.getValueOfSuperset();
+            if (e.getValueOfReps().length())
+                val["reps"] = e.getValueOfReps();
+            if (e.getValueOfSuperset())
+                val["superset"] = e.getValueOfSuperset();
             data.append(std::move(val));
         }
     }
     
-    if (params.at("book") == "1")
+    if (params.at("book") == "0")
     {
         std::unique_ptr<std::vector<Strength>> work = getWork<Strength>(number);
+    
         for (const auto& s: *work)
         { 
             Json::Value val;
             val["exercise"] = s.getValueOfExercise();
-            val["reps"] = s.getValueOfReps();
+            if (s.getValueOfReps().length())
+                val["reps"] = s.getValueOfReps();
             data.append(std::move(val));
         }
     }
-
+    
     auto resp=HttpResponse::newHttpJsonResponse(data);
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     callback(resp);

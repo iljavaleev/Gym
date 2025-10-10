@@ -10,9 +10,9 @@ const Button = ({ cls, onClick, type = 'button', children,
 
 
 const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text', 
-    isFocused, children, onInputChange, onClick, help }) => {
+    isFocused, children, onInputChange, onClick, help, ...rest }) => {
     const inputRef = useRef();
-
+    
     useEffect(() => {
         if (isFocused && inputRef.current) 
         {
@@ -27,7 +27,7 @@ const InputWithLabel = ({ id, cls, value, defaultValue, type = 'text',
             &nbsp;
             <input ref={inputRef} value={value} id={id} 
                 type={type} defaultValue={defaultValue} 
-                onChange={onInputChange} placeholder={help} onClick={onClick}/>
+                onChange={onInputChange} placeholder={help} onClick={onClick} {...rest}/>
         </div>
     );
 };

@@ -45,7 +45,7 @@ CREATE TABLE workout(
     count int NOT NULL,
     user_id int references gym_user(id) ON DELETE CASCADE,
     exercise int references user_exercise(id) ON DELETE SET NULL,
-    date DATE NOT NULL,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     UNIQUE (date, user_id, exercise), 
     UNIQUE (count, date)
 );
@@ -56,7 +56,7 @@ CREATE TABLE load(
     reps int NOT NULL,
     expect int,
     fact int,
-    CHECK (expect > 0 AND reps < 100),
+    CHECK (reps > 0 AND reps <= 100),
     CHECK (expect is NULL OR (expect >= 0 and expect < 500)),
     CHECK (fact is NULL OR (fact >= 0 and fact < 500))
 );

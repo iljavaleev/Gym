@@ -3,6 +3,7 @@
 #include "utils/utils.hpp"
 #include "models/Workout.h"
 #include "models/Load.h"
+#include <sstream>
 
 using drogon_model::cpp_gymdb::Workout;
 using drogon_model::cpp_gymdb::Load;
@@ -11,40 +12,47 @@ using drogon::orm::Criteria;
 using drogon::orm::CompareOperator;
 using drogon::orm::Mapper;
 
-constexpr std::string_view GETQUERY = "select w.date date, w.count count" 
-    " e.id id, e.title title, l.reps reps, l.expect expect, l.fact fact from"
-    " Workout w join Load l on w.id=l.workout join Exercise e on" 
-    " e.id=w.exercise where w.date={} and w.user_id={} order by w.count, l.id";
+constexpr std::string_view GET_WITH_DATE_QUERY = 
+    "select w.date date, w.count count, e.id id, e.title title, l.reps reps, "
+    "l.expect expect, l.fact fact from Workout w "
+    "join Load l on w.id=l.workout "
+    "join User_exercise e on e.id=w.exercise "
+    "where w.date='{}'::timestamp and w.user_id={} order by w.count, l.id";
 
-constexpr std::string_view GETSUBQ = "(select w.date from Workout w where"
-    " w.date>={} and w.user_id={} order by w.date limit 1)";
+constexpr std::string_view GET_WITHOUT_DATE_QUERY = 
+    "select w.date date, w.count count, e.id id, e.title title, l.reps reps, "
+    "l.expect expect, l.fact fact from Workout w "
+    "join Load l on w.id=l.workout "
+    "join User_exercise e on e.id=w.exercise "
+    "where w.date=(select w.date as date from Workout w "
+    "where w.date>='{}'::timestamp and w.user_id={} order by w.date limit 1) "
+    "and w.user_id={} order by w.count, l.id";
 
 
-std::unique_ptr<Json::Value> Training::getOne(size_t user_id, 
+std::unique_ptr<Json::Value> Training::getOne(int user_id, 
     std::string_view date, drogon::orm::DbClientPtr clientPtr) const
 {
     std::unique_ptr<Json::Value> userTraining = std::make_unique<Json::Value>();
     Json::Value training(Json::arrayValue);
-    
     std::string query;
     
     if (not date.empty())
     {
         auto args = std::make_format_args(date, user_id);
-        query = std::vformat(GETQUERY, args);
+        query = std::vformat(GET_WITH_DATE_QUERY, args);
     }
     else
     {
-        auto args = std::make_format_args(date, user_id);
-        std::string subq = std::vformat(GETSUBQ, args);
-        query = std::vformat(std::move(subq), args);
+        date = trantor::Date::date().toCustomFormattedString("%Y-%m-%dT%H:%M:%S");
+        auto args = std::make_format_args(date, user_id, user_id);
+        query = std::vformat(GET_WITHOUT_DATE_QUERY, args);
     }
-    
     auto res_future = clientPtr->execSqlAsyncFuture(query);
-    
     try
     {
-        auto result = res_future.get();
+        drogon::orm::Result result = res_future.get();
+        if (result.empty())
+            return nullptr;
         
         auto first = result.begin();
         (*userTraining)["date"] = (*first)["date"].as<std::string>();
@@ -97,55 +105,55 @@ std::unique_ptr<Json::Value> Training::getOne(size_t user_id,
     return nullptr;
 }
 
-int Training::addAll(size_t user_id, 
+int Training::addAll(int user_id, 
     std::string_view date, const Json::Value& training, 
     drogon::orm::DbClientPtr clientPtr) const
 {
-    Mapper<Workout> workMapper(clientPtr);
-    Mapper<Load> loadMapper(clientPtr);
-
-    for (Json::ArrayIndex i = 0; i < training.size(); ++i) 
+    std::string uid;
+    auto transPtr = clientPtr->newTransaction();
+    try
     {
-        const Json::Value& element = training[i];
-        Json::Value w;
-        w["id"] = drogon::utils::getUuid();
-        w["count"] = element["count"];
-        w["exercise"] = element["exercise"]["id"];
-        w["user_id"] = static_cast<int>(user_id);
-        w["date"] = date.data();
-        
-        Workout tmpw(w);
-        try
+        for (Json::ArrayIndex i = 0; i < training.size(); ++i) 
         {
-            workMapper.insert(tmpw);
-        }
-        catch(const std::exception& e)
-        {
-            LOGGER->error(e.what());
-            return -1;
-        }
-        
-        for (Json::ArrayIndex j = 0; i < training["load"].size(); ++j)
-        {
-            const auto l = training["load"][j];
-            Load tmpl(l);
-            try
+            const Json::Value& element = training[i];
+            uid = drogon::utils::getUuid();
+            
+            auto w_fut = transPtr->execSqlAsyncFuture(
+                "INSERT INTO workout VALUES($1, $2, $3, $4, $5)", 
+                uid, element["count"].asString(), user_id, 
+                element["exercise"]["id"].asString(), date.data());
+            
+            w_fut.get();
+
+            for (Json::ArrayIndex j = 0; j < element["load"].size(); ++j)
             {
-                loadMapper.insert(tmpl);
-            }
-            catch(const std::exception& e)
-            {
-                LOGGER->error(e.what());
-                return -1;
-            }
-        }   
+                auto l = element["load"][j];
+                if (l["reps"].empty())
+                    return -1;
+
+                auto l_fut = transPtr->execSqlAsyncFuture(
+                    "INSERT INTO load(workout, reps, expect, fact) \
+                    VALUES($1, $2, $3, $4)", uid, l["reps"].asString(), 
+                    (l["expect"].asString().length() ? 
+                        l["expect"].asString() : "0"), 
+                    (l["fact"].asString().length() ? 
+                        l["fact"].asString() : "0"));
+                
+                l_fut.get();
+            }   
+        }
     }
+    catch(const std::exception& e)
+    {
+        LOGGER->error(e.what());
+        return -1;
+    }
+   
     return 0;
 } 
     
 
-
-int Training::deleteOne(size_t user_id, std::string_view date, 
+int Training::deleteOne(int user_id, std::string_view date, 
     drogon::orm::DbClientPtr clientPtr) const
 {
     Mapper<Workout> mp(clientPtr);
@@ -173,7 +181,6 @@ int Training::deleteOne(size_t user_id, std::string_view date,
 void Training::getTraining(const HttpRequestPtr &req,
             std::function<void (const HttpResponsePtr &)> &&callback) const
 {
-    
     std::unique_ptr<Json::Value> jsonUser = stringToJson(req->getBody());
     if (not jsonUser)
     {
@@ -181,11 +188,26 @@ void Training::getTraining(const HttpRequestPtr &req,
             drogon::HttpStatusCode::k500InternalServerError);
         return;
     }
+    auto params = req->getParameters();
+    std::string_view training_date; 
+    if (params.contains("date") && not params.at("date").empty())
+        training_date = params.at("date");
     
     std::unique_ptr<Json::Value> training = 
-        getOne((*jsonUser)["user"]["id"].asInt());
+        getOne((*jsonUser)["user"]["id"].asInt(), training_date);
 
-    auto resp=HttpResponse::newHttpJsonResponse(*training);
+    Json::Value res;
+    if (training != nullptr)
+    {
+        res = *training;
+    }
+    else
+    {
+        res["date"] = training_date.empty() ? "" : training_date.data();
+        res["training"] = Json::Value(Json::arrayValue);
+    }
+
+    auto resp=HttpResponse::newHttpJsonResponse(std::move(res));
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     callback(resp);
 }
@@ -216,17 +238,18 @@ void Training::postTraining(const HttpRequestPtr &req,
     }
 
     Json::Value training = (*body)["training"];
-    if (training.isArray() || not training.empty()) 
+    if (not training.isArray() || training.empty()) 
     {
         sendBadRequest(callback, "Server error", 
             drogon::HttpStatusCode::k400BadRequest);
         return;
     }
+    
     if (addAll(user_id, date, training) == -1)
-    {   
+    {
         LOGGER->error("DB error");
-        sendBadRequest(callback, "Server error", 
-            drogon::HttpStatusCode::k500InternalServerError);
+        sendBadRequest(callback, "Bad request", 
+            drogon::HttpStatusCode::k400BadRequest);
         return;
     }
 
