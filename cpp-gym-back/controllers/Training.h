@@ -5,7 +5,6 @@
 using namespace drogon;
 
 
-
 class Training : public drogon::HttpController<Training>
 {
   std::unique_ptr<Json::Value> getOne(int user_id, std::string_view date,

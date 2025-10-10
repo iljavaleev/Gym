@@ -2,6 +2,7 @@
 export DB_USER="postgres"
 export DB_PASSWORD="postgres"
 export DB_NAME="cpp_gymdb"
+export TEST_DB_NAME="test_db"
 export DB_PORT="5432"
 export POSTGRES_PASSWORD="postgres"
 export DB_HOST="localhost"

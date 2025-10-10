@@ -12,6 +12,7 @@ using drogon::orm::Criteria;
 using drogon::orm::CompareOperator;
 using drogon::orm::Mapper;
 
+
 template<typename T>
 std::unique_ptr<std::vector<T>> Generic::getWork(int number, 
     drogon::orm::DbClientPtr clientPtr) const
@@ -79,7 +80,7 @@ void Generic::seacrh(const HttpRequestPtr &req,
             data.append(std::move(val));
         }
     }
-
+    
     auto resp=HttpResponse::newHttpJsonResponse(data);
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     callback(resp);
