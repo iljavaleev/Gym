@@ -12,6 +12,7 @@ import { getUserExs } from '../exercise/utils';
 import { UserDataContext } from './appContext';
 import { StyledChiled, StyledContainer, StyledNavDesk, StyledNavMobile, StyledMenu } from './styles';
 import {LoginIcon, LogoutIcon, RegisterIcon, MyTrainingIcon, CalendarIcon} from '../icons/navicons'
+import { Statistics } from '../statistics/statistics';
 
 
 const ProtectedRoute = ({ children }) => {
@@ -60,11 +61,18 @@ const App = () => {
             onLogout={handleLogout}/>}>
           <Route index element={<Generic />} />
           <Route path="my-training/*" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <UserDataContext.Provider value={userExs}>
                 <MyTraining onChange={handleDataChange}/>
               </UserDataContext.Provider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
+          }/>
+          <Route path="statistics/*" element={
+            // <ProtectedRoute>
+              <UserDataContext.Provider value={userExs}>
+                <Statistics/>
+              </UserDataContext.Provider>
+            // </ProtectedRoute>
           }/>
           <Route path="login" element={<LoginForm/>}/>
           <Route path="register" element={<SignUpForm/>}/>
@@ -95,6 +103,7 @@ const Layout = ( {token, onLogout} ) => {
         <StyledMenu>
           <li><NavLink to="/" >Программа тренировок</NavLink></li>
           <li><NavLink to="/my-training">Мои тренировки</NavLink></li>
+          <li><NavLink to="/statistics">Статистика</NavLink></li>
           {!token && 
             <li>
                 <NavLink className="nav-right" to="/login">
@@ -119,6 +128,7 @@ const Layout = ( {token, onLogout} ) => {
         <StyledMenu className="mobile-footer">
           <li><NavLink to="/"><CalendarIcon label={"программа"}/></NavLink></li>
           <li><NavLink to="/my-training"><MyTrainingIcon label={"мои тренировки"}/></NavLink></li>
+          <li><NavLink to="/statistics"><MyTrainingIcon label={"статистика"}/></NavLink></li>
           {!token && 
             <li>
                 <NavLink className="nav-right" to="/login">

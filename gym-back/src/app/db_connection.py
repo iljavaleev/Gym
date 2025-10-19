@@ -16,8 +16,9 @@ def get_session():
       session_maker: Session = sessionmaker(autocommit=False, autoflush=False, 
                                             bind=get_engine())
       try:
-         session = session_maker()
+         session: Session = session_maker()
          yield session
       finally:
          session.close()
          
+

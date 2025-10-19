@@ -11,7 +11,7 @@ import { getTrainingByDate,
     getInitialQueryUrl
 } from './utils'; 
 import { UserDataContext } from "../app/appContext";
-import { trainingData } from './data';
+import { trainingData } from '../components/data';
 import { StyledContainer } from './styles';
 
 

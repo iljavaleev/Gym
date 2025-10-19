@@ -1,8 +1,7 @@
-import { InputWithLabel, Button } from "../components/components";
-import { trainingData } from "../training/data";
-import { useState, useContext, useRef } from "react";
-import { UserDataContext } from "../app/appContext";
+import { InputWithLabel, Button, AutocompleteExInput } from "../components/components";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+
 
 
 const LABELS = { reps: "повторения", expect: "ожидаемый результат", 
@@ -69,16 +68,24 @@ const TrainingFormList = ({ list, addEx, delEx, addSet, delSet, changed }) => {
 };
 
 
-const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
+const FormItem = ({ item, exNum, addSet, delSet, changed }) => {
     item.count = exNum;
     const [showError, setShowError] = useState(Boolean(item.error));
     const removeError = () => { setShowError(false); delete item.error; }; 
     
+    const handleSuggestionClick = (suggestion) => {
+        item.exercise.title = suggestion.title;
+        item.exercise.id = suggestion.id;
+        changed.current = true;
+    };
+    
     return (
         <div className="exercise">
-            <AutocompleteInput id={"title" + exNum} className="title" 
-                userData={userData} removeError={removeError} item={item} 
-                changed={changed}
+            <AutocompleteExInput id={"title" + exNum} className="title" 
+                onInputClick={removeError} 
+                handleSuggestionClick={handleSuggestionClick}
+                item={item.exercise}
+                changed={changed} 
             />
             <br/>
             {item.load.map(load => 
@@ -98,60 +105,6 @@ const FormItem = ({ item, userData, exNum, addSet, delSet, changed }) => {
         </div>
     );
 };
-
-
-const AutocompleteInput = ({ item, id, removeError, changed }) => {
-    const userExs = useContext(UserDataContext);
-    const userTrainingData = useRef(userExs.concat(trainingData));
-    
-    const [inputValue, setInputValue] = useState({
-        title: item.exercise.title, id: item.exercise.id});
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    
-    const filtered = inputValue ? userTrainingData.current.filter(suggestion => 
-        {   
-            const re = new RegExp(
-                `(^| )(${inputValue?.title?.toLowerCase().trim()})+`
-            );
-            return re.test(suggestion.title.toLowerCase());
-        }
-    ) : [];
-    
-    const handleChange = (event) => {
-        setShowSuggestions(true);
-        setInputValue({ ...inputValue, title: event.target.value});
-    };
-
-    const handleSuggestionClick = (suggestion) => {
-        setInputValue({ ...inputValue, title: suggestion.title, 
-            id: suggestion.id});
-        item.exercise.title = suggestion.title;
-        item.exercise.id = suggestion.id;
-        setShowSuggestions(false);
-        changed.current = true; 
-    };
-
-
-    return (
-        <>
-            <input className="title" type="text" placeholder="упражнение"
-                value={inputValue?.title} onChange={handleChange} 
-                onClick={() => removeError()} id={id}
-            />
-            
-            {showSuggestions && (
-            <ul className="scrollable-list">
-                {filtered.map((suggestion, index) => (
-                <li key={index} 
-                    onClick={() => handleSuggestionClick(suggestion)}>
-                    {suggestion.title}
-                </li>
-                ))}
-            </ul>
-            )}
-        </>
-    );
-}
 
 
 const ObjectToForm = ({obj, removeError, changed }) => {

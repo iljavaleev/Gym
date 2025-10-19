@@ -1,4 +1,4 @@
-import { trainingData } from "./data";
+import { trainingData } from "../components/data";
 
 
 const VALIDATION = {
